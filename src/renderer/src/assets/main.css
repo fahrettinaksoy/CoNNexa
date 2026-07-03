@@ -1,0 +1,18 @@
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.terminal-host {
+  height: 100%;
+  width: 100%;
+  background: #0f1115;
+  padding: 4px;
+}
+
+.terminal-host .xterm {
+  height: 100%;
+}

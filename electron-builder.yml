@@ -1,0 +1,29 @@
+appId: com.connexa.app
+productName: Connexa
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**
+  - '!**/.vscode/*'
+  - '!src/*'
+  - '!electron.vite.config.{js,ts,mjs,cjs}'
+  - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+asarUnpack:
+  - node_modules/node-pty/**
+  - node_modules/@serialport/**
+  - node_modules/serialport/**
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - dmg
+    - zip
+win:
+  target:
+    - nsis
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Development
+npmRebuild: true
