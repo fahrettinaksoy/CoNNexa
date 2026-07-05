@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
+import LtrRegion from '@/components/LtrRegion.vue'
 import type { HostMetrics } from '@shared/types'
 
 const props = defineProps<{ sessionId: string }>()
@@ -60,7 +61,9 @@ function barColor(pct: number): string {
 </script>
 
 <template>
-  <div class="d-flex flex-column fill-height monitor-panel">
+  <!-- Metrikler, disk yolları ve süreç komut satırları teknik içeriktir: LTR yalıtılır. -->
+  <LtrRegion>
+    <div class="d-flex flex-column fill-height monitor-panel">
     <div class="d-flex align-center px-3 py-2 flex-grow-0">
       <v-icon icon="mdi-gauge" size="small" class="mr-2" />
       <span class="text-subtitle-2">{{ t('monitor.title') }}</span>
@@ -70,6 +73,7 @@ function barColor(pct: number): string {
         size="x-small"
         variant="text"
         :loading="loading"
+        :title="t('sftp.refresh')"
         @click="refresh"
       />
     </div>
@@ -77,7 +81,7 @@ function barColor(pct: number): string {
 
     <div class="flex-grow-1 overflow-y-auto pa-3">
       <template v-if="metrics && !metrics.ok">
-        <v-alert type="warning" variant="tonal" density="compact">
+        <v-alert type="warning">
           {{ metrics.error || t('monitor.unavailable') }}
         </v-alert>
       </template>
@@ -100,7 +104,7 @@ function barColor(pct: number): string {
           class="mb-1"
         />
         <div class="text-caption text-medium-emphasis mb-4">
-          load: {{ metrics.loadAvg?.map((n) => n.toFixed(2)).join(' · ') || '—' }}
+          {{ t('monitor.load') }}: {{ metrics.loadAvg?.map((n) => n.toFixed(2)).join(' · ') || '—' }}
         </div>
 
         <!-- Bellek -->
@@ -159,7 +163,8 @@ function barColor(pct: number): string {
         <v-progress-circular indeterminate size="24" />
       </div>
     </div>
-  </div>
+    </div>
+  </LtrRegion>
 </template>
 
 <style scoped>

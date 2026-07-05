@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { useVaultStore } from '@/stores/vault'
 import { useTeamsStore } from '@/stores/teams'
 import { hostActionsKey } from '@/composables/hostActions'
+import { protocolIcon } from '@/plugins/icons'
 import type { Host } from '@shared/types'
 
 const props = defineProps<{ host: Host }>()
@@ -18,14 +19,6 @@ async function assignTeam(teamId: string | null): Promise<void> {
   await vault.load()
 }
 
-const protocolIcon: Record<string, string> = {
-  ssh: 'mdi-console-network',
-  telnet: 'mdi-lan-connect',
-  local: 'mdi-console',
-  rdp: 'mdi-monitor',
-  vnc: 'mdi-monitor-eye',
-  serial: 'mdi-serial-port'
-}
 </script>
 
 <template>
@@ -35,7 +28,7 @@ const protocolIcon: Record<string, string> = {
     @dblclick="actions.connect(host)"
   >
     <template #prepend>
-      <v-icon :icon="protocolIcon[host.protocol]" :color="host.color" size="small" />
+      <v-icon :icon="protocolIcon(host.protocol)" :color="host.color" size="small" />
     </template>
     <template #append>
       <v-icon
@@ -54,9 +47,15 @@ const protocolIcon: Record<string, string> = {
       />
       <v-menu>
         <template #activator="{ props: menuProps }">
-          <v-btn icon="mdi-dots-vertical" size="x-small" variant="text" v-bind="menuProps" />
+          <v-btn
+            icon="mdi-dots-vertical"
+            size="x-small"
+            variant="text"
+            :title="t('common.more')"
+            v-bind="menuProps"
+          />
         </template>
-        <v-list density="compact">
+        <v-list>
           <v-list-item :title="t('hosts.edit')" @click="actions.editHost(host)" />
           <v-list-item
             v-if="host.protocol === 'rdp'"
@@ -73,7 +72,7 @@ const protocolIcon: Record<string, string> = {
                 append-icon="mdi-menu-right"
               />
             </template>
-            <v-list density="compact">
+            <v-list>
               <v-list-item
                 v-for="tv in teams.teams"
                 :key="tv.id"

@@ -3,7 +3,7 @@ import { ref, watch } from 'vue'
 
 export const useSettingsStore = defineStore('settings', () => {
   const locale = ref(localStorage.getItem('connexa:locale') ?? 'tr')
-  const theme = ref(localStorage.getItem('connexa:theme') ?? 'dark')
+  const theme = ref(localStorage.getItem('connexa:theme') ?? 'system')
   const terminalTheme = ref(localStorage.getItem('connexa:terminalTheme') ?? 'connexa-dark')
 
   watch(locale, (value) => localStorage.setItem('connexa:locale', value))

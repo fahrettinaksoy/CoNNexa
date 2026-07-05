@@ -7,10 +7,12 @@ export default {
     tunnels: 'Tüneller',
     sync: 'Senkronizasyon',
     teams: 'Ekipler',
-    settings: 'Ayarlar'
+    settings: 'Ayarlar',
+    toggleSidebar: 'Kenar çubuğunu aç/kapat'
   },
   hosts: {
     title: 'Sunucular',
+    navLabel: 'Sunucular',
     add: 'Sunucu Ekle',
     edit: 'Sunucuyu Düzenle',
     delete: 'Sil',
@@ -44,6 +46,7 @@ export default {
   },
   identities: {
     title: 'Kimlikler',
+    navLabel: 'Kimlikler',
     add: 'Kimlik Ekle',
     edit: 'Kimliği Düzenle',
     name: 'Kimlik adı',
@@ -67,7 +70,8 @@ export default {
     },
     secretRef: 'Sır referansı / komut',
     empty: 'Henüz kimlik eklenmedi.',
-    secure: 'Sırlar işletim sistemi anahtar zincirinde şifrelenir.'
+    secure: 'Sırlar işletim sistemi anahtar zincirinde şifrelenir.',
+    search: 'Kimlik ara…'
   },
   sessions: {
     localTerminal: 'Yerel Terminal',
@@ -78,12 +82,15 @@ export default {
     connecting: 'Bağlanıyor…',
     connectionFailed: 'Bağlantı başarısız',
     disconnected: 'Bağlantı kapandı',
+    missingConfig: 'Bağlantı yapılandırması eksik',
+    securityFailure: 'Güvenlik el sıkışması başarısız',
     welcomeTitle: 'Connexa’ya hoş geldiniz',
     welcomeText:
       'Soldaki listeden bir sunucuya bağlanın veya yeni bir yerel terminal açın.'
   },
   snippets: {
     title: 'Komut Parçacıkları',
+    navLabel: 'Komutlar',
     add: 'Parçacık Ekle',
     edit: 'Parçacığı Düzenle',
     name: 'Ad',
@@ -91,7 +98,8 @@ export default {
     run: 'Çalıştır',
     empty: 'Henüz komut parçacığı yok.',
     noTarget: 'Çalıştırmak için açık bir terminal oturumu yok.',
-    ranBroadcast: '{count} oturumda çalıştırıldı'
+    ranBroadcast: '{count} oturumda çalıştırıldı',
+    search: 'Komut ara…'
   },
   broadcast: {
     toggle: 'Yayın modu (tüm terminallere yaz)',
@@ -243,6 +251,7 @@ export default {
     cores: 'çekirdek',
     memory: 'Bellek',
     disks: 'Diskler',
+    load: 'yük',
     topProcesses: 'En yoğun süreçler',
     command: 'Komut',
     unavailable: 'Metrikler alınamadı (yalnızca Linux SSH oturumları desteklenir).'
@@ -258,7 +267,14 @@ export default {
     rename: 'Yeniden adlandır',
     emptyDir: 'Bu dizin boş.',
     downloaded: 'İndirildi: {path}',
-    uploaded: '{count} dosya yüklendi'
+    uploaded: '{count} dosya yüklendi',
+    error: 'SFTP hatası',
+    unavailable: 'Bu oturum için SFTP kullanılamıyor',
+    downloadFailed: 'İndirme başarısız',
+    uploadFailed: 'Yükleme başarısız',
+    deleteFailed: 'Silme başarısız',
+    mkdirFailed: 'Klasör oluşturulamadı',
+    renameFailed: 'Yeniden adlandırma başarısız'
   },
   importer: {
     title: 'İçe Aktar',
@@ -269,6 +285,7 @@ export default {
     termius: 'Termius (JSON)',
     summary:
       '{hosts} sunucu, {identities} kimlik, {groups} grup içe aktarıldı; {skipped} kayıt atlandı.',
+    failed: 'İçe aktarma başarısız',
     passwordNote:
       'Not: mRemoteNG parolaları master parola ile şifreli olduğundan aktarılmaz; kimlikleri içe aktardıktan sonra parolaları Connexa’da güncelleyin.'
   },
@@ -276,15 +293,76 @@ export default {
     title: 'Ayarlar',
     language: 'Dil',
     theme: 'Tema',
+    themeSystem: 'Sistem',
     themeDark: 'Koyu',
     themeLight: 'Açık',
-    terminalTheme: 'Terminal renk şeması'
+    terminalTheme: 'Terminal renk şeması',
+    sections: {
+      general: 'Genel',
+      importer: 'İçe Aktar',
+      cloud: 'Bulut',
+      alarm: 'Alarmlar',
+      ai: 'AI Asistan',
+      plugins: 'Eklentiler',
+      recording: 'Kayıtlar',
+      display: 'Görüntü'
+    }
+  },
+  display: {
+    title: 'Ekran ve Platform',
+    description:
+      'Arayüz pencere boyutuna uyum sağlar. Mobil eşiğin altında kenar çubuğu overlay drawer olur ve yardımcı paneller katmanlanır.',
+    breakpoint: 'Aktif kesme noktası',
+    layoutMode: 'Yerleşim modu',
+    compact: 'Sıkışık',
+    expanded: 'Geniş',
+    mobileBreakpoint: 'Mobil kesme noktası',
+    platform: 'Platform',
+    hint: 'Yerleşimin canlı olarak uyum sağlamasını görmek için pencereyi yeniden boyutlandırın.'
   },
   common: {
     save: 'Kaydet',
     cancel: 'İptal',
     delete: 'Sil',
+    close: 'Kapat',
+    more: 'Diğer işlemler',
+    edit: 'Düzenle',
     confirmDelete: 'Silmek istediğinize emin misiniz?',
-    required: 'Bu alan zorunludur'
+    required: 'Bu alan zorunludur',
+    noResults: 'Sonuç bulunamadı'
+  },
+  validation: {
+    port: 'Port 1 ile 65535 arasında olmalı',
+    positive: 'Pozitif bir sayı olmalı'
+  },
+  hotkeys: {
+    title: 'Klavye Kısayolları',
+    footer: 'Kısayollar terminal odaktayken bile her yerde çalışır.',
+    categories: {
+      general: 'Genel',
+      navigation: 'Gezinme',
+      session: 'Oturumlar',
+      panels: 'Paneller'
+    },
+    actions: {
+      palette: 'Komut paletini aç',
+      help: 'Klavye kısayollarını göster',
+      settings: 'Ayarları aç',
+      goWorkspace: 'Çalışma alanına git',
+      goTunnels: 'Tünellere git',
+      goSync: 'Senkronizasyona git',
+      goTeams: 'Ekiplere git',
+      newTerminal: 'Yeni yerel terminal',
+      closeSession: 'Aktif oturumu kapat',
+      splitVertical: 'Dikey böl',
+      splitHorizontal: 'Yatay böl',
+      nextTab: 'Sonraki oturum sekmesi',
+      prevTab: 'Önceki oturum sekmesi',
+      toggleSftp: 'SFTP panelini aç/kapat',
+      toggleMonitor: 'İzleme panelini aç/kapat',
+      toggleBroadcast: 'Yayın modunu aç/kapat',
+      toggleRecording: 'Kaydı başlat/durdur',
+      aiAssistant: 'AI asistanını aç'
+    }
   }
 }

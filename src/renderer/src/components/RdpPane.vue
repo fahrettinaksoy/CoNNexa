@@ -17,7 +17,7 @@ onMounted(async () => {
   const cfg = props.session.rdp
   if (!cfg || !canvas.value) {
     status.value = 'error'
-    errorMsg.value = 'Missing RDP configuration'
+    errorMsg.value = t('sessions.missingConfig')
     return
   }
   try {
@@ -74,7 +74,7 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .rdp-host {
-  background: #0f1115;
+  background: rgb(var(--v-theme-surface));
   overflow: auto;
 }
 .rdp-canvas {
@@ -84,6 +84,6 @@ onBeforeUnmount(() => {
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 17, 21, 0.85);
+  background: rgba(var(--v-theme-surface), 0.85);
 }
 </style>

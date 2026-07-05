@@ -61,16 +61,15 @@ function route(tunnel: Tunnel): string {
 </script>
 
 <template>
-  <v-container>
+  <div class="pa-4">
     <div class="d-flex align-center mb-4">
-      <h2 class="text-h5">{{ t('tunnels.title') }}</h2>
       <v-spacer />
       <v-btn color="primary" variant="flat" prepend-icon="mdi-plus" @click="add">
         {{ t('tunnels.add') }}
       </v-btn>
     </div>
 
-    <v-card v-if="vault.tunnels.length === 0" class="pa-8 text-center text-medium-emphasis">
+    <v-card v-if="vault.tunnels.length === 0" variant="tonal" class="pa-8 text-center text-medium-emphasis">
       {{ t('tunnels.empty') }}
     </v-card>
 
@@ -90,7 +89,7 @@ function route(tunnel: Tunnel): string {
           <td>
             <v-icon
               :icon="tunnels.isRunning(tunnel.id) ? 'mdi-circle' : 'mdi-circle-outline'"
-              :color="tunnels.isRunning(tunnel.id) ? 'success' : 'grey'"
+              :color="tunnels.isRunning(tunnel.id) ? 'success' : 'on-surface-variant'"
               size="x-small"
             />
           </td>
@@ -121,6 +120,7 @@ function route(tunnel: Tunnel): string {
               icon="mdi-delete-outline"
               size="small"
               variant="text"
+              :title="t('common.delete')"
               @click="remove(tunnel)"
             />
           </td>
@@ -138,5 +138,5 @@ function route(tunnel: Tunnel): string {
     >
       {{ errorMsg }}
     </v-snackbar>
-  </v-container>
+  </div>
 </template>

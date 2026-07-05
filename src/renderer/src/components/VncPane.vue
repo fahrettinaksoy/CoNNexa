@@ -19,7 +19,7 @@ onMounted(() => {
   const cfg = props.session.vnc
   if (!cfg || !container.value) {
     status.value = 'error'
-    errorMsg.value = 'Missing VNC configuration'
+    errorMsg.value = t('sessions.missingConfig')
     return
   }
   try {
@@ -27,7 +27,9 @@ onMounted(() => {
       credentials: cfg.password ? { password: cfg.password } : undefined
     })
     rfb.scaleViewport = true
-    rfb.background = '#0F1115'
+    // Canvas arka planı tema yüzey rengini izler (workbench temasıyla tutarlı).
+    rfb.background =
+      getComputedStyle(container.value).backgroundColor || 'rgb(15, 17, 21)'
     rfb.addEventListener('connect', () => (status.value = 'connected'))
     rfb.addEventListener('disconnect', (e: CustomEvent) => {
       if (!e.detail?.clean && status.value !== 'connected') {
@@ -37,7 +39,7 @@ onMounted(() => {
     })
     rfb.addEventListener('securityfailure', (e: CustomEvent) => {
       status.value = 'error'
-      errorMsg.value = e.detail?.reason ?? 'Security failure'
+      errorMsg.value = e.detail?.reason ?? t('sessions.securityFailure')
     })
   } catch (err) {
     status.value = 'error'
@@ -78,11 +80,11 @@ onBeforeUnmount(() => {
 .remote-canvas {
   width: 100%;
   height: 100%;
-  background: #0f1115;
+  background: rgb(var(--v-theme-surface));
 }
 .overlay {
   position: absolute;
   inset: 0;
-  background: rgba(15, 17, 21, 0.85);
+  background: rgba(var(--v-theme-surface), 0.85);
 }
 </style>

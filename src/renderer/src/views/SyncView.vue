@@ -89,16 +89,14 @@ const canSync = computed(
 </script>
 
 <template>
-  <v-container max-width="680">
-    <h2 class="text-h5 mb-2">{{ t('sync.title') }}</h2>
-    <p class="text-body-2 text-medium-emphasis mb-6">{{ t('sync.description') }}</p>
+  <div class="pa-4">
+    <p class="text-body-2 text-medium-emphasis mb-4">{{ t('sync.description') }}</p>
 
     <v-card class="pa-4 mb-6">
       <div class="text-subtitle-2 mb-3">{{ t('sync.backend') }}</div>
       <v-select
         v-model="backend"
         :items="backendItems"
-        density="comfortable"
         prepend-inner-icon="mdi-cloud-cog-outline"
       />
 
@@ -108,7 +106,6 @@ const canSync = computed(
           :label="t('sync.gistToken')"
           :placeholder="config.hasGistToken ? '••••••••' : ''"
           type="password"
-          density="comfortable"
           autocomplete="off"
         />
         <v-text-field
@@ -116,7 +113,6 @@ const canSync = computed(
           :label="t('sync.gistId')"
           :hint="t('sync.gistIdHint')"
           persistent-hint
-          density="comfortable"
         />
       </template>
 
@@ -125,12 +121,10 @@ const canSync = computed(
           v-model="webdavUrl"
           :label="t('sync.webdavUrl')"
           placeholder="https://dav.example.com/connexa/"
-          density="comfortable"
         />
         <v-text-field
           v-model="webdavUsername"
           :label="t('sync.webdavUsername')"
-          density="comfortable"
           autocomplete="off"
         />
         <v-text-field
@@ -138,7 +132,6 @@ const canSync = computed(
           :label="t('sync.webdavPassword')"
           :placeholder="config.hasWebdavPassword ? '••••••••' : ''"
           type="password"
-          density="comfortable"
           autocomplete="off"
         />
       </template>
@@ -155,7 +148,6 @@ const canSync = computed(
         v-model="passphrase"
         :label="t('sync.passphrase')"
         type="password"
-        density="comfortable"
         prepend-inner-icon="mdi-key"
         autocomplete="off"
       />
@@ -180,13 +172,7 @@ const canSync = computed(
           {{ t('sync.pull') }}
         </v-btn>
       </div>
-      <v-alert
-        v-if="message"
-        :type="message.type"
-        variant="tonal"
-        density="compact"
-        class="mt-4"
-      >
+      <v-alert v-if="message" :type="message.type" class="mt-4">
         {{ message.text }}
       </v-alert>
       <div class="text-caption text-medium-emphasis mt-4">
@@ -194,5 +180,5 @@ const canSync = computed(
         {{ t('sync.zeroKnowledge') }}
       </div>
     </v-card>
-  </v-container>
+  </div>
 </template>

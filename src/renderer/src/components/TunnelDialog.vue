@@ -2,19 +2,16 @@
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVaultStore } from '@/stores/vault'
+import { useRules } from '@/composables/rules'
+import CrudDialog from '@/components/CrudDialog.vue'
 import type { Tunnel, TunnelType } from '@shared/types'
 
-const props = defineProps<{
-  modelValue: boolean
-  tunnel?: Tunnel | null
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-}>()
+const model = defineModel<boolean>({ default: false })
+const props = defineProps<{ tunnel?: Tunnel | null }>()
 
 const { t } = useI18n()
 const vault = useVaultStore()
+const { required, port } = useRules()
 
 const form = ref<Tunnel>(emptyForm())
 
@@ -31,12 +28,9 @@ function emptyForm(): Tunnel {
   }
 }
 
-watch(
-  () => props.modelValue,
-  (openNow) => {
-    if (openNow) form.value = props.tunnel ? { ...props.tunnel } : emptyForm()
-  }
-)
+watch(model, (openNow) => {
+  if (openNow) form.value = props.tunnel ? { ...props.tunnel } : emptyForm()
+})
 
 const typeItems = computed(() => [
   { title: t('tunnels.types.local'), value: 'local' as TunnelType },
@@ -53,53 +47,46 @@ const hostItems = computed(() =>
 
 const needsDest = computed(() => form.value.type !== 'dynamic')
 
-const valid = computed(
-  () =>
-    form.value.name.trim() !== '' &&
-    form.value.hostId !== '' &&
-    form.value.listenPort > 0 &&
-    (!needsDest.value || (Boolean(form.value.destHost?.trim()) && Boolean(form.value.destPort)))
-)
-
 async function save(): Promise<void> {
   const payload = { ...form.value }
   if (payload.type === 'dynamic') {
     payload.destHost = undefined
     payload.destPort = undefined
   }
-  await window.connexa.vault.saveTunnel(JSON.parse(JSON.stringify(payload)))
-  await vault.load()
-  emit('update:modelValue', false)
+  await vault.saveTunnel(payload)
+  model.value = false
 }
 </script>
 
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    max-width="520"
-    @update:model-value="emit('update:modelValue', $event)"
+  <CrudDialog
+    v-model="model"
+    :title="tunnel ? t('tunnels.edit') : t('tunnels.add')"
+    @save="save"
   >
-    <v-card :title="tunnel ? t('tunnels.edit') : t('tunnels.add')">
-      <v-card-text>
-        <v-text-field v-model="form.name" :label="t('tunnels.name')" density="comfortable" />
+    <v-text-field
+      v-model="form.name"
+      :label="t('tunnels.name')"
+      :rules="[required]"
+      autofocus
+    />
         <v-select
           v-model="form.type"
           :items="typeItems"
           :label="t('tunnels.type')"
-          density="comfortable"
         />
         <v-select
           v-model="form.hostId"
           :items="hostItems"
           :label="t('tunnels.host')"
-          density="comfortable"
+          :rules="[required]"
         />
         <v-row>
           <v-col cols="8">
             <v-text-field
               v-model="form.listenHost"
               :label="t('tunnels.listenHost')"
-              density="comfortable"
+              :rules="[required]"
             />
           </v-col>
           <v-col cols="4">
@@ -107,7 +94,7 @@ async function save(): Promise<void> {
               v-model.number="form.listenPort"
               :label="t('tunnels.listenPort')"
               type="number"
-              density="comfortable"
+              :rules="[port]"
             />
           </v-col>
         </v-row>
@@ -116,7 +103,7 @@ async function save(): Promise<void> {
             <v-text-field
               v-model="form.destHost"
               :label="t('tunnels.destHost')"
-              density="comfortable"
+              :rules="[required]"
             />
           </v-col>
           <v-col cols="4">
@@ -124,21 +111,10 @@ async function save(): Promise<void> {
               v-model.number="form.destPort"
               :label="t('tunnels.destPort')"
               type="number"
-              density="comfortable"
+              :rules="[port]"
             />
           </v-col>
         </v-row>
         <div class="text-caption text-medium-emphasis">{{ t(`tunnels.hints.${form.type}`) }}</div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="emit('update:modelValue', false)">
-          {{ t('common.cancel') }}
-        </v-btn>
-        <v-btn color="primary" variant="flat" :disabled="!valid" @click="save">
-          {{ t('common.save') }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  </CrudDialog>
 </template>

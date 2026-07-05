@@ -9,10 +9,115 @@ body,
 .terminal-host {
   height: 100%;
   width: 100%;
-  background: #0f1115;
+  /* Terminal dolgu alanı Vuetify tema arkaplanını takip eder (koyu/açık tutarlı). */
+  background: rgb(var(--v-theme-background));
   padding: 4px;
 }
 
 .terminal-host .xterm {
   height: 100%;
+}
+
+/* ============================================================================
+   Connexa — Material Design 3 global cilası
+
+   Renk token'ları  → [plugins/theme.ts]
+   Bileşen varsayılanları → [plugins/defaults.ts]
+
+   Buradaki kurallar yalnızca token/prop ile ifade EDİLEMEYEN ince ayarları
+   tamamlar: MD3 köşe yarıçapı ölçeği, yumuşak-dağınık gölge, koyu temada tonal
+   yükseltme, nav rail aktif göstergesi ve kaydırma çubukları. main.css Vuetify
+   stillerinden SONRA yüklendiği için eşit özgüllükte bu kurallar kazanır.
+   ============================================================================ */
+
+:root {
+  /* MD3 köşe yarıçapı ölçeği (Vuetify'ın rounded-lg=8px'ini markaya çekiyoruz). */
+  --cx-radius-card: 16px;
+  --cx-radius-btn: 12px;
+  --cx-radius-sheet: 12px;
+}
+
+/* ── Yüzeyler: kenarlık yerine yumuşak, dağınık gölgeyle derinlik ──────────── */
+.v-card,
+.v-sheet.rounded-lg {
+  border-radius: var(--cx-radius-card);
+}
+
+.v-card.v-card--variant-elevated {
+  /* İki katmanlı yumuşak gölge: yakın-keskin + uzak-dağınık = modern MD elevation. */
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    0 4px 20px rgba(15, 23, 42, 0.06);
+}
+
+/* Koyu temada MD3 "tonal elevation": gölge yerine yüzeyi bir kademe aydınlat. */
+.v-theme--dark .v-card.v-card--variant-elevated {
+  background-color: rgb(var(--v-theme-surface-light));
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 6px 24px rgba(0, 0, 0, 0.28);
+}
+
+/* Menü / seçim kutuları da yumuşak yükseltmeyle gelir. */
+.v-overlay__content > .v-list,
+.v-overlay__content > .v-card,
+.v-menu > .v-overlay__content {
+  border-radius: var(--cx-radius-sheet);
+}
+
+/* ── Eylemler: MD3 yuvarlaklığı; ikon/fab butonlar dairesel kalır ──────────── */
+.v-btn:not(.v-btn--icon):not(.v-btn--round) {
+  border-radius: var(--cx-radius-btn);
+}
+
+/* ── Kenarlıklar/ayraçlar: hiç çizgi yok ───────────────────────────────────
+   Paneller ana zeminden yalnızca YÜZEY RENGİYLE ayrışır (surface ↔ background,
+   bkz. [theme.ts]); sert 1px kenarlık ya da hairline gölge yok — MD3 dili. */
+.v-navigation-drawer {
+  border: none !important;
+}
+
+/* ── Dikey sekme rayları (ayarlar + sol panel bölümleri): ikon/etiket sekmeleri
+   ana gövdeden yüzey rengiyle ayrışır; aktif göstergesi primary'dir (defaults). */
+.v-tabs--vertical .v-tab {
+  justify-content: flex-start;
+}
+
+/* ── Üst app bar navigasyon göstergesi (MD3 imzası) ────────────────────────
+   Aktif öğe primary'ye boyanır; Vuetify'ın aktif durum katmanı (overlay)
+   currentColor'ı kullandığından ikonun arkasında primary tonlu bir "pill"
+   oluşur. */
+.app-bar-nav .v-btn.v-btn--active {
+  color: rgb(var(--v-theme-primary));
+}
+.app-bar-nav .v-btn.v-btn--active .v-btn__overlay {
+  opacity: 0.14;
+  border-radius: inherit;
+}
+.app-bar-nav .v-btn {
+  transition: color 0.18s ease;
+}
+
+/* ── Liste öğeleri: MD3 durum katmanı + yuvarlak "nav" hissi ───────────────── */
+.v-list-item {
+  transition: background-color 0.15s ease;
+}
+
+/* ── İnce, temaya uyumlu kaydırma çubukları (terminal kendi çubuğunu kullanır) */
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+*::-webkit-scrollbar-thumb {
+  background-color: rgba(var(--v-theme-on-surface), 0.2);
+  border-radius: 8px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(var(--v-theme-on-surface), 0.32);
+  background-clip: padding-box;
 }

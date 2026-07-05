@@ -36,11 +36,12 @@ const hosts = computed(() => vault.hosts.filter((h) => h.groupId === props.group
                 icon="mdi-dots-vertical"
                 size="x-small"
                 variant="text"
+                :title="t('common.more')"
                 v-bind="menuProps"
                 @click.stop
               />
             </template>
-            <v-list density="compact">
+            <v-list>
               <v-list-item :title="t('groups.edit')" @click="actions.editGroup(group)" />
               <v-list-item :title="t('groups.addSub')" @click="actions.addGroup(group.id)" />
               <v-list-item

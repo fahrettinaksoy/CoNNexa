@@ -1,20 +1,17 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVaultStore } from '@/stores/vault'
+import { useRules } from '@/composables/rules'
+import CrudDialog from '@/components/CrudDialog.vue'
 import type { Snippet } from '@shared/types'
 
-const props = defineProps<{
-  modelValue: boolean
-  snippet?: Snippet | null
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-}>()
+const model = defineModel<boolean>({ default: false })
+const props = defineProps<{ snippet?: Snippet | null }>()
 
 const { t } = useI18n()
 const vault = useVaultStore()
+const { required } = useRules()
 
 const form = ref<Snippet>(emptyForm())
 
@@ -22,60 +19,44 @@ function emptyForm(): Snippet {
   return { id: '', name: '', command: '', tags: [] }
 }
 
-watch(
-  () => props.modelValue,
-  (openNow) => {
-    if (openNow) form.value = props.snippet ? { ...props.snippet } : emptyForm()
-  }
-)
-
-const valid = computed(
-  () => form.value.name.trim() !== '' && form.value.command.trim() !== ''
-)
+watch(model, (openNow) => {
+  if (openNow) form.value = props.snippet ? { ...props.snippet } : emptyForm()
+})
 
 async function save(): Promise<void> {
   await vault.saveSnippet(form.value)
-  emit('update:modelValue', false)
+  model.value = false
 }
 </script>
 
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    max-width="520"
-    @update:model-value="emit('update:modelValue', $event)"
+  <CrudDialog
+    v-model="model"
+    :title="snippet ? t('snippets.edit') : t('snippets.add')"
+    @save="save"
   >
-    <v-card :title="snippet ? t('snippets.edit') : t('snippets.add')">
-      <v-card-text>
-        <v-text-field v-model="form.name" :label="t('snippets.name')" density="comfortable" />
-        <v-textarea
-          v-model="form.command"
-          :label="t('snippets.command')"
-          density="comfortable"
-          auto-grow
-          rows="3"
-          class="command-field"
-        />
-        <v-combobox
-          v-model="form.tags"
-          :label="t('hosts.tags')"
-          multiple
-          chips
-          closable-chips
-          density="comfortable"
-        />
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="emit('update:modelValue', false)">
-          {{ t('common.cancel') }}
-        </v-btn>
-        <v-btn color="primary" variant="flat" :disabled="!valid" @click="save">
-          {{ t('common.save') }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <v-text-field
+      v-model="form.name"
+      :label="t('snippets.name')"
+      :rules="[required]"
+      autofocus
+    />
+    <v-textarea
+      v-model="form.command"
+      :label="t('snippets.command')"
+      :rules="[required]"
+      auto-grow
+      rows="3"
+      class="command-field"
+    />
+    <v-combobox
+      v-model="form.tags"
+      :label="t('hosts.tags')"
+      multiple
+      chips
+      closable-chips
+    />
+  </CrudDialog>
 </template>
 
 <style scoped>

@@ -60,6 +60,11 @@ export const useVaultStore = defineStore('vault', () => {
     await load()
   }
 
+  async function saveTunnel(tunnel: Tunnel): Promise<void> {
+    await window.connexa.vault.saveTunnel(JSON.parse(JSON.stringify(tunnel)))
+    await load()
+  }
+
   /** parentId → alt gruplar (kök için undefined anahtarı) */
   const groupsByParent = computed(() => {
     const map = new Map<string | undefined, Group[]>()
@@ -104,6 +109,7 @@ export const useVaultStore = defineStore('vault', () => {
     deleteGroup,
     saveSnippet,
     deleteSnippet,
+    saveTunnel,
     identityName
   }
 })

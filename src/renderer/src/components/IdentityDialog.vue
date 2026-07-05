@@ -2,19 +2,16 @@
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVaultStore } from '@/stores/vault'
+import { useRules } from '@/composables/rules'
+import CrudDialog from '@/components/CrudDialog.vue'
 import type { IdentityPublic, IdentitySaveRequest, SecretManager } from '@shared/types'
 
-const props = defineProps<{
-  modelValue: boolean
-  identity?: IdentityPublic | null
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-}>()
+const model = defineModel<boolean>({ default: false })
+const props = defineProps<{ identity?: IdentityPublic | null }>()
 
 const { t } = useI18n()
 const vault = useVaultStore()
+const { required } = useRules()
 
 const form = ref<IdentitySaveRequest>(emptyForm())
 /** Parola kaynağı: vault'ta saklanan mı yoksa harici yöneticiden mi */
@@ -25,9 +22,7 @@ function emptyForm(): IdentitySaveRequest {
   return { name: '', username: '', authType: 'password' }
 }
 
-watch(
-  () => props.modelValue,
-  (openNow) => {
+watch(model, (openNow) => {
     if (!openNow) return
     form.value = props.identity
       ? {
@@ -69,10 +64,6 @@ const secretRefPlaceholder = computed(() => {
   }
 })
 
-const valid = computed(
-  () => form.value.name.trim() !== '' && form.value.username.trim() !== ''
-)
-
 async function save(): Promise<void> {
   // Parola kaynağını secretRef alanına dönüştür
   if (form.value.authType === 'password' && passwordSource.value !== 'stored') {
@@ -82,50 +73,50 @@ async function save(): Promise<void> {
     form.value.secretRef = null
   }
   await vault.saveIdentity(form.value)
-  emit('update:modelValue', false)
+  model.value = false
 }
 </script>
 
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    max-width="480"
-    @update:model-value="emit('update:modelValue', $event)"
+  <CrudDialog
+    v-model="model"
+    :title="identity ? t('identities.edit') : t('identities.add')"
+    :max-width="480"
+    @save="save"
   >
-    <v-card :title="identity ? t('identities.edit') : t('identities.add')">
-      <v-card-text>
-        <v-text-field v-model="form.name" :label="t('identities.name')" density="comfortable" />
+    <v-text-field
+      v-model="form.name"
+      :label="t('identities.name')"
+      :rules="[required]"
+      autofocus
+    />
         <v-text-field
           v-model="form.username"
           :label="t('identities.username')"
-          density="comfortable"
+          :rules="[required]"
         />
         <v-select
           v-model="form.authType"
           :items="authItems"
           :label="t('identities.authType')"
-          density="comfortable"
         />
         <template v-if="form.authType === 'password'">
           <v-select
             v-model="passwordSource"
             :items="passwordSourceItems"
             :label="t('identities.passwordSource')"
-            density="comfortable"
           />
           <v-text-field
             v-if="passwordSource === 'stored'"
             v-model="form.password"
             :label="identity?.hasPassword ? t('identities.passwordKeep') : t('identities.password')"
             type="password"
-            density="comfortable"
           />
           <v-text-field
             v-else
             v-model="secretRefValue"
             :label="t('identities.secretRef')"
             :placeholder="secretRefPlaceholder"
-            density="comfortable"
           />
         </template>
         <template v-if="form.authType === 'key'">
@@ -133,29 +124,16 @@ async function save(): Promise<void> {
             v-model="form.privateKeyPath"
             :label="t('identities.privateKeyPath')"
             placeholder="~/.ssh/id_ed25519"
-            density="comfortable"
           />
           <v-text-field
             v-model="form.passphrase"
             :label="t('identities.passphrase')"
             type="password"
-            density="comfortable"
           />
         </template>
         <div class="text-caption text-medium-emphasis mt-1">
           <v-icon icon="mdi-shield-lock-outline" size="small" class="mr-1" />
           {{ t('identities.secure') }}
         </div>
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="emit('update:modelValue', false)">
-          {{ t('common.cancel') }}
-        </v-btn>
-        <v-btn color="primary" variant="flat" :disabled="!valid" @click="save">
-          {{ t('common.save') }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  </CrudDialog>
 </template>

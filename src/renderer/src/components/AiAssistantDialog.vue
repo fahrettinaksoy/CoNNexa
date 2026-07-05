@@ -89,7 +89,6 @@ function insertCommand(): void {
           :placeholder="t('ai.placeholder')"
           rows="2"
           auto-grow
-          density="comfortable"
           autofocus
           @keydown.enter.exact.prevent="ask"
         />
@@ -99,7 +98,7 @@ function insertCommand(): void {
           <v-progress-circular indeterminate size="18" />
           <span class="text-body-2">{{ t('ai.thinking') }}</span>
         </div>
-        <v-alert v-if="errorMsg" type="error" variant="tonal" density="compact" class="mt-2">
+        <v-alert v-if="errorMsg" type="error" class="mt-2">
           {{ errorMsg }}
         </v-alert>
       </v-card-text>

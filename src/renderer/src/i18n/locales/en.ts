@@ -7,10 +7,12 @@ export default {
     tunnels: 'Tunnels',
     sync: 'Sync',
     teams: 'Teams',
-    settings: 'Settings'
+    settings: 'Settings',
+    toggleSidebar: 'Toggle sidebar'
   },
   hosts: {
     title: 'Hosts',
+    navLabel: 'Hosts',
     add: 'Add Host',
     edit: 'Edit Host',
     delete: 'Delete',
@@ -44,6 +46,7 @@ export default {
   },
   identities: {
     title: 'Identities',
+    navLabel: 'Identities',
     add: 'Add Identity',
     edit: 'Edit Identity',
     name: 'Identity name',
@@ -67,7 +70,8 @@ export default {
     },
     secretRef: 'Secret reference / command',
     empty: 'No identities yet.',
-    secure: 'Secrets are encrypted with the OS keychain.'
+    secure: 'Secrets are encrypted with the OS keychain.',
+    search: 'Search identities…'
   },
   sessions: {
     localTerminal: 'Local Terminal',
@@ -78,11 +82,14 @@ export default {
     connecting: 'Connecting…',
     connectionFailed: 'Connection failed',
     disconnected: 'Disconnected',
+    missingConfig: 'Missing connection configuration',
+    securityFailure: 'Security handshake failed',
     welcomeTitle: 'Welcome to Connexa',
     welcomeText: 'Connect to a host from the list on the left, or open a new local terminal.'
   },
   snippets: {
     title: 'Snippets',
+    navLabel: 'Snippets',
     add: 'Add Snippet',
     edit: 'Edit Snippet',
     name: 'Name',
@@ -90,7 +97,8 @@ export default {
     run: 'Run',
     empty: 'No snippets yet.',
     noTarget: 'No open terminal session to run in.',
-    ranBroadcast: 'Ran in {count} sessions'
+    ranBroadcast: 'Ran in {count} sessions',
+    search: 'Search snippets…'
   },
   broadcast: {
     toggle: 'Broadcast mode (type to all terminals)',
@@ -242,6 +250,7 @@ export default {
     cores: 'cores',
     memory: 'Memory',
     disks: 'Disks',
+    load: 'load',
     topProcesses: 'Top processes',
     command: 'Command',
     unavailable: 'Could not fetch metrics (only Linux SSH sessions are supported).'
@@ -257,7 +266,14 @@ export default {
     rename: 'Rename',
     emptyDir: 'This directory is empty.',
     downloaded: 'Downloaded: {path}',
-    uploaded: 'Uploaded {count} file(s)'
+    uploaded: 'Uploaded {count} file(s)',
+    error: 'SFTP error',
+    unavailable: 'SFTP is not available for this session',
+    downloadFailed: 'Download failed',
+    uploadFailed: 'Upload failed',
+    deleteFailed: 'Delete failed',
+    mkdirFailed: 'Could not create folder',
+    renameFailed: 'Rename failed'
   },
   importer: {
     title: 'Import',
@@ -267,6 +283,7 @@ export default {
     termius: 'Termius (JSON)',
     summary:
       'Imported {hosts} hosts, {identities} identities, {groups} groups; skipped {skipped} entries.',
+    failed: 'Import failed',
     passwordNote:
       'Note: mRemoteNG passwords are encrypted with a master password and cannot be imported; update passwords in Connexa after importing identities.'
   },
@@ -274,15 +291,76 @@ export default {
     title: 'Settings',
     language: 'Language',
     theme: 'Theme',
+    themeSystem: 'System',
     themeDark: 'Dark',
     themeLight: 'Light',
-    terminalTheme: 'Terminal color scheme'
+    terminalTheme: 'Terminal color scheme',
+    sections: {
+      general: 'General',
+      importer: 'Import',
+      cloud: 'Cloud',
+      alarm: 'Alarms',
+      ai: 'AI Assistant',
+      plugins: 'Plugins',
+      recording: 'Recordings',
+      display: 'Display'
+    }
+  },
+  display: {
+    title: 'Display & Platform',
+    description:
+      'The interface adapts to the window size. Below the mobile breakpoint the sidebar collapses into an overlay drawer and auxiliary panels stack.',
+    breakpoint: 'Active breakpoint',
+    layoutMode: 'Layout mode',
+    compact: 'Compact',
+    expanded: 'Expanded',
+    mobileBreakpoint: 'Mobile breakpoint',
+    platform: 'Platform',
+    hint: 'Resize the window to see the layout adapt in real time.'
   },
   common: {
     save: 'Save',
     cancel: 'Cancel',
     delete: 'Delete',
+    close: 'Close',
+    more: 'More actions',
+    edit: 'Edit',
     confirmDelete: 'Are you sure you want to delete this?',
-    required: 'This field is required'
+    required: 'This field is required',
+    noResults: 'No results'
+  },
+  validation: {
+    port: 'Port must be between 1 and 65535',
+    positive: 'Must be a positive number'
+  },
+  hotkeys: {
+    title: 'Keyboard Shortcuts',
+    footer: 'Shortcuts work anywhere, even while a terminal is focused.',
+    categories: {
+      general: 'General',
+      navigation: 'Navigation',
+      session: 'Sessions',
+      panels: 'Panels'
+    },
+    actions: {
+      palette: 'Open command palette',
+      help: 'Show keyboard shortcuts',
+      settings: 'Open settings',
+      goWorkspace: 'Go to workspace',
+      goTunnels: 'Go to tunnels',
+      goSync: 'Go to sync',
+      goTeams: 'Go to teams',
+      newTerminal: 'New local terminal',
+      closeSession: 'Close active session',
+      splitVertical: 'Split vertically',
+      splitHorizontal: 'Split horizontally',
+      nextTab: 'Next session tab',
+      prevTab: 'Previous session tab',
+      toggleSftp: 'Toggle SFTP panel',
+      toggleMonitor: 'Toggle monitor panel',
+      toggleBroadcast: 'Toggle broadcast mode',
+      toggleRecording: 'Start/stop recording',
+      aiAssistant: 'Open AI assistant'
+    }
   }
 }

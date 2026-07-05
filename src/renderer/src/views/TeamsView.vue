@@ -3,11 +3,14 @@ import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useTeamsStore } from '@/stores/teams'
 import { useVaultStore } from '@/stores/vault'
+import { useRules } from '@/composables/rules'
+import CrudDialog from '@/components/CrudDialog.vue'
 import type { TeamVaultPublic, TeamVaultInput } from '@shared/types'
 
 const { t } = useI18n()
 const teams = useTeamsStore()
 const vault = useVaultStore()
+const { required } = useRules()
 
 const dialog = ref(false)
 const editing = ref<TeamVaultPublic | null>(null)
@@ -103,17 +106,15 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
 </script>
 
 <template>
-  <v-container max-width="720">
-    <div class="d-flex align-center mb-2">
-      <h2 class="text-h5">{{ t('teams.title') }}</h2>
-      <v-spacer />
+  <div class="pa-4">
+    <div class="d-flex justify-end mb-3">
       <v-btn color="primary" variant="flat" prepend-icon="mdi-account-group" @click="add">
         {{ t('teams.add') }}
       </v-btn>
     </div>
     <p class="text-body-2 text-medium-emphasis mb-6">{{ t('teams.description') }}</p>
 
-    <v-card v-if="teams.teams.length === 0" class="pa-8 text-center text-medium-emphasis">
+    <v-card v-if="teams.teams.length === 0" variant="tonal" class="pa-8 text-center text-medium-emphasis">
       {{ t('teams.empty') }}
     </v-card>
 
@@ -123,8 +124,14 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
         <span class="text-subtitle-1">{{ tv.name }}</span>
         <v-chip size="x-small" label class="ml-2">{{ tv.backend }}</v-chip>
         <v-spacer />
-        <v-btn icon="mdi-pencil" size="small" variant="text" @click="edit(tv)" />
-        <v-btn icon="mdi-delete-outline" size="small" variant="text" @click="remove(tv)" />
+        <v-btn icon="mdi-pencil" size="small" variant="text" :title="t('common.edit')" @click="edit(tv)" />
+        <v-btn
+          icon="mdi-delete-outline"
+          size="small"
+          variant="text"
+          :title="t('common.delete')"
+          @click="remove(tv)"
+        />
       </div>
       <div class="text-caption text-medium-emphasis mb-3">
         {{ t('teams.members', { count: memberCount(tv.id) }) }}
@@ -133,7 +140,6 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
         v-model="passphrase[tv.id]"
         :label="t('teams.passphrase')"
         type="password"
-        density="comfortable"
         prepend-inner-icon="mdi-key"
         autocomplete="off"
         hide-details
@@ -164,7 +170,7 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
       </div>
     </v-card>
 
-    <v-alert v-if="message" :type="message.type" variant="tonal" density="compact" class="mt-2">
+    <v-alert v-if="message" :type="message.type" class="mt-2">
       {{ message.text }}
     </v-alert>
 
@@ -174,15 +180,21 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
     </div>
 
     <!-- Ekip vault düzenleme -->
-    <v-dialog v-model="dialog" max-width="520">
-      <v-card :title="editing ? t('teams.edit') : t('teams.add')">
-        <v-card-text>
-          <v-text-field v-model="form.name" :label="t('teams.name')" density="comfortable" />
+    <CrudDialog
+      v-model="dialog"
+      :title="editing ? t('teams.edit') : t('teams.add')"
+      @save="save"
+    >
+      <v-text-field
+        v-model="form.name"
+        :label="t('teams.name')"
+        :rules="[required]"
+        autofocus
+      />
           <v-select
             v-model="form.backend"
             :items="backendItems"
             :label="t('teams.backend')"
-            density="comfortable"
           />
           <template v-if="!showWebdav">
             <v-text-field
@@ -190,13 +202,11 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
               :label="t('teams.gistToken')"
               :placeholder="editing?.hasGistToken ? '••••••••' : ''"
               type="password"
-              density="comfortable"
               autocomplete="off"
             />
             <v-text-field
               v-model="form.gistId"
               :label="t('teams.gistId')"
-              density="comfortable"
             />
           </template>
           <template v-else>
@@ -204,12 +214,10 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
               v-model="form.webdavUrl"
               :label="t('teams.webdavUrl')"
               placeholder="https://dav.example.com/team/"
-              density="comfortable"
             />
             <v-text-field
               v-model="form.webdavUsername"
               :label="t('teams.webdavUsername')"
-              density="comfortable"
               autocomplete="off"
             />
             <v-text-field
@@ -217,19 +225,9 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
               :label="t('teams.webdavPassword')"
               :placeholder="editing?.hasWebdavPassword ? '••••••••' : ''"
               type="password"
-              density="comfortable"
               autocomplete="off"
             />
           </template>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn variant="text" @click="dialog = false">{{ t('common.cancel') }}</v-btn>
-          <v-btn color="primary" variant="flat" :disabled="!form.name.trim()" @click="save">
-            {{ t('common.save') }}
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
-  </v-container>
+    </CrudDialog>
+  </div>
 </template>

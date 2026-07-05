@@ -2,33 +2,29 @@
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVaultStore } from '@/stores/vault'
+import { useRules } from '@/composables/rules'
+import CrudDialog from '@/components/CrudDialog.vue'
 import type { Group } from '@shared/types'
 
+const model = defineModel<boolean>({ default: false })
 const props = defineProps<{
-  modelValue: boolean
   group?: Group | null
   /** Yeni grup için önerilen üst grup */
   parentId?: string
 }>()
 
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-}>()
-
 const { t } = useI18n()
 const vault = useVaultStore()
+const { required } = useRules()
 
 const form = ref<Group>({ id: '', name: '' })
 
-watch(
-  () => props.modelValue,
-  (openNow) => {
-    if (!openNow) return
-    form.value = props.group
-      ? { ...props.group }
-      : { id: '', name: '', parentId: props.parentId }
-  }
-)
+watch(model, (openNow) => {
+  if (!openNow) return
+  form.value = props.group
+    ? { ...props.group }
+    : { id: '', name: '', parentId: props.parentId }
+})
 
 /** Düzenlenen grubun kendisi ve tüm altları üst grup olamaz (döngü koruması) */
 const descendantIds = computed(() => {
@@ -54,45 +50,36 @@ const identityItems = computed(() =>
 
 async function save(): Promise<void> {
   await vault.saveGroup(form.value)
-  emit('update:modelValue', false)
+  model.value = false
 }
 </script>
 
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    max-width="440"
-    @update:model-value="emit('update:modelValue', $event)"
+  <CrudDialog
+    v-model="model"
+    :title="group ? t('groups.edit') : t('groups.add')"
+    :max-width="440"
+    @save="save"
   >
-    <v-card :title="group ? t('groups.edit') : t('groups.add')">
-      <v-card-text>
-        <v-text-field v-model="form.name" :label="t('groups.name')" density="comfortable" />
-        <v-select
-          v-model="form.parentId"
-          :items="parentItems"
-          :label="t('groups.parent')"
-          density="comfortable"
-          clearable
-        />
-        <v-select
-          v-model="form.identityId"
-          :items="identityItems"
-          :label="t('groups.defaultIdentity')"
-          :hint="t('groups.defaultIdentityHint')"
-          persistent-hint
-          density="comfortable"
-          clearable
-        />
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="emit('update:modelValue', false)">
-          {{ t('common.cancel') }}
-        </v-btn>
-        <v-btn color="primary" variant="flat" :disabled="!form.name.trim()" @click="save">
-          {{ t('common.save') }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+    <v-text-field
+      v-model="form.name"
+      :label="t('groups.name')"
+      :rules="[required]"
+      autofocus
+    />
+    <v-select
+      v-model="form.parentId"
+      :items="parentItems"
+      :label="t('groups.parent')"
+      clearable
+    />
+    <v-select
+      v-model="form.identityId"
+      :items="identityItems"
+      :label="t('groups.defaultIdentity')"
+      :hint="t('groups.defaultIdentityHint')"
+      persistent-hint
+      clearable
+    />
+  </CrudDialog>
 </template>

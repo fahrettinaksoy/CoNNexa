@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useRouter } from 'vue-router'
 import { useEventListener } from '@vueuse/core'
 import { useVaultStore } from '@/stores/vault'
 import { useSessionsStore } from '@/stores/sessions'
 import { usePluginsStore } from '@/stores/plugins'
+import { useUiStore } from '@/stores/ui'
+import { protocolIcon } from '@/plugins/icons'
 
 interface Command {
   id: string
@@ -17,23 +18,24 @@ interface Command {
 }
 
 const { t } = useI18n()
-const router = useRouter()
 const vault = useVaultStore()
 const sessions = useSessionsStore()
 const plugins = usePluginsStore()
+const ui = useUiStore()
 
 const open = ref(false)
 const query = ref('')
 const selectedIndex = ref(0)
-const inputRef = ref<HTMLInputElement | null>(null)
+const inputRef = ref<{ focus: () => void } | null>(null)
+const paletteList = ref<{ $el: HTMLElement } | null>(null)
 
-const protocolIcon: Record<string, string> = {
-  ssh: 'mdi-console-network',
-  telnet: 'mdi-lan-connect',
-  local: 'mdi-console',
-  rdp: 'mdi-monitor',
-  vnc: 'mdi-monitor-eye',
-  serial: 'mdi-serial-port'
+/** Klavye ile seçilen satırı kaydırılabilir liste içinde görünür tutar. */
+function scrollActiveIntoView(): void {
+  nextTick(() => {
+    paletteList.value?.$el
+      ?.querySelector('.v-list-item--active')
+      ?.scrollIntoView({ block: 'nearest' })
+  })
 }
 
 /** Tüm komutlar: hostlar (bağlan) + snippet'ler (çalıştır) + statik eylemler */
@@ -42,7 +44,7 @@ const allCommands = computed<Command[]>(() => {
     id: `host:${h.id}`,
     label: h.name,
     hint: `${h.protocol.toUpperCase()} · ${h.hostname}:${h.port}`,
-    icon: protocolIcon[h.protocol] ?? 'mdi-server',
+    icon: protocolIcon(h.protocol),
     keywords: `${h.name} ${h.hostname} ${h.tags.join(' ')} ${h.protocol}`,
     run: () => void sessions.openForHost(h.id)
   }))
@@ -80,7 +82,7 @@ const allCommands = computed<Command[]>(() => {
       hint: t('palette.action'),
       icon: 'mdi-cog-outline',
       keywords: 'settings ayarlar',
-      run: () => void router.push({ name: 'settings' })
+      run: () => ui.openSheet('settings')
     }
   ]
 
@@ -120,16 +122,14 @@ function execute(cmd?: Command): void {
   target.run()
 }
 
+function toggle(): void {
+  open.value ? hide() : show()
+}
+
+// Palet açıkken içi gezinme tuşları (aç/kapa kısayolu merkezî keymap'te; bkz.
+// App.vue → useAppHotkeys). Bu tuşların modifier'ı yok ve yalnızca palet açık ve
+// arama alanı odaktayken anlamlıdır, bu yüzden burada elle ele alınır.
 function onKeydown(e: KeyboardEvent): void {
-  // Aç: Cmd/Ctrl+K veya Alt+M (1Remote deseni)
-  const toggleKey =
-    ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') ||
-    (e.altKey && e.key.toLowerCase() === 'm')
-  if (toggleKey) {
-    e.preventDefault()
-    open.value ? hide() : show()
-    return
-  }
   if (!open.value) return
   if (e.key === 'Escape') {
     e.preventDefault()
@@ -137,9 +137,11 @@ function onKeydown(e: KeyboardEvent): void {
   } else if (e.key === 'ArrowDown') {
     e.preventDefault()
     selectedIndex.value = Math.min(selectedIndex.value + 1, results.value.length - 1)
+    scrollActiveIntoView()
   } else if (e.key === 'ArrowUp') {
     e.preventDefault()
     selectedIndex.value = Math.max(selectedIndex.value - 1, 0)
+    scrollActiveIntoView()
   } else if (e.key === 'Enter') {
     e.preventDefault()
     execute()
@@ -148,7 +150,7 @@ function onKeydown(e: KeyboardEvent): void {
 
 useEventListener(window, 'keydown', onKeydown)
 
-defineExpose({ show })
+defineExpose({ show, hide, toggle })
 </script>
 
 <template>
@@ -169,10 +171,9 @@ defineExpose({ show })
         flat
         hide-details
         autofocus
-        density="comfortable"
       />
       <v-divider />
-      <v-list density="compact" class="palette-list">
+      <v-list ref="paletteList" class="palette-list">
         <v-list-item
           v-for="(cmd, index) in results"
           :key="cmd.id"
@@ -180,7 +181,7 @@ defineExpose({ show })
           :title="cmd.label"
           :subtitle="cmd.hint"
           @click="execute(cmd)"
-          @mousemove="selectedIndex = index"
+          @mouseenter="selectedIndex = index"
         >
           <template #prepend>
             <v-icon :icon="cmd.icon" size="small" />

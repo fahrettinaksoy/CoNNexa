@@ -2,19 +2,16 @@
 import { ref, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVaultStore } from '@/stores/vault'
+import { useRules } from '@/composables/rules'
+import CrudDialog from '@/components/CrudDialog.vue'
 import type { Host, Protocol } from '@shared/types'
 
-const props = defineProps<{
-  modelValue: boolean
-  host?: Host | null
-}>()
-
-const emit = defineEmits<{
-  (e: 'update:modelValue', value: boolean): void
-}>()
+const model = defineModel<boolean>({ default: false })
+const props = defineProps<{ host?: Host | null }>()
 
 const { t } = useI18n()
 const vault = useVaultStore()
+const { required, port, positiveInt } = useRules()
 
 const defaultPorts: Record<Protocol, number> = {
   ssh: 22,
@@ -38,12 +35,9 @@ function emptyHost(): Host {
   }
 }
 
-watch(
-  () => props.modelValue,
-  (openNow) => {
-    if (openNow) form.value = props.host ? { ...props.host } : emptyHost()
-  }
-)
+watch(model, (openNow) => {
+  if (openNow) form.value = props.host ? { ...props.host } : emptyHost()
+})
 
 watch(
   () => form.value.protocol,
@@ -75,30 +69,23 @@ const groupItems = computed(() =>
   vault.groups.map((g) => ({ title: g.name, value: g.id }))
 )
 
-const valid = computed(
-  () => form.value.name.trim() !== '' && form.value.hostname.trim() !== ''
-)
-
 async function save(): Promise<void> {
   await vault.saveHost(form.value)
-  emit('update:modelValue', false)
+  model.value = false
 }
 </script>
 
 <template>
-  <v-dialog
-    :model-value="modelValue"
-    max-width="520"
-    @update:model-value="emit('update:modelValue', $event)"
+  <CrudDialog
+    v-model="model"
+    :title="host ? t('hosts.edit') : t('hosts.add')"
+    @save="save"
   >
-    <v-card :title="host ? t('hosts.edit') : t('hosts.add')">
-      <v-card-text>
-        <v-text-field v-model="form.name" :label="t('hosts.name')" density="comfortable" />
+    <v-text-field v-model="form.name" :label="t('hosts.name')" :rules="[required]" autofocus />
         <v-select
           v-model="form.protocol"
           :items="protocolItems"
           :label="t('hosts.protocol')"
-          density="comfortable"
         />
         <v-row>
           <v-col cols="8">
@@ -106,7 +93,7 @@ async function save(): Promise<void> {
               v-model="form.hostname"
               :label="isSerial ? t('hosts.devicePath') : t('hosts.hostname')"
               :placeholder="isSerial ? '/dev/tty.usbserial' : ''"
-              density="comfortable"
+              :rules="[required]"
             />
           </v-col>
           <v-col cols="4">
@@ -114,7 +101,7 @@ async function save(): Promise<void> {
               v-model.number="form.port"
               :label="isSerial ? t('hosts.baudRate') : t('hosts.port')"
               type="number"
-              density="comfortable"
+              :rules="isSerial ? [positiveInt] : [port]"
             />
           </v-col>
         </v-row>
@@ -125,21 +112,18 @@ async function save(): Promise<void> {
           :label="t('hosts.identity')"
           :hint="t('hosts.identityInheritHint')"
           persistent-hint
-          density="comfortable"
           clearable
         />
         <v-select
           v-model="form.groupId"
           :items="groupItems"
           :label="t('hosts.group')"
-          density="comfortable"
           clearable
         />
         <v-text-field
           v-if="form.protocol === 'ssh'"
           v-model="form.startupCommand"
           :label="t('hosts.startupCommand')"
-          density="comfortable"
         />
         <v-combobox
           v-model="form.tags"
@@ -147,18 +131,6 @@ async function save(): Promise<void> {
           multiple
           chips
           closable-chips
-          density="comfortable"
         />
-      </v-card-text>
-      <v-card-actions>
-        <v-spacer />
-        <v-btn variant="text" @click="emit('update:modelValue', false)">
-          {{ t('common.cancel') }}
-        </v-btn>
-        <v-btn color="primary" variant="flat" :disabled="!valid" @click="save">
-          {{ t('common.save') }}
-        </v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+  </CrudDialog>
 </template>
