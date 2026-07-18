@@ -1,11 +1,11 @@
 <script setup lang="ts">
+import type { Host } from '@shared/types'
 import { inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useTeamsStore } from '@/stores/teams'
 import { hostActionsKey } from '@/composables/hostActions'
 import { protocolIcon } from '@/plugins/icons'
-import type { Host } from '@shared/types'
+import { useTeamsStore } from '@/stores/teams'
+import { useVaultStore } from '@/stores/vault'
 
 const props = defineProps<{ host: Host }>()
 
@@ -18,7 +18,6 @@ async function assignTeam(teamId: string | null): Promise<void> {
   await window.connexa.team.assign('host', props.host.id, teamId)
   await vault.load()
 }
-
 </script>
 
 <template>

@@ -85,8 +85,7 @@ export default {
     missingConfig: 'Bağlantı yapılandırması eksik',
     securityFailure: 'Güvenlik el sıkışması başarısız',
     welcomeTitle: 'Connexa’ya hoş geldiniz',
-    welcomeText:
-      'Soldaki listeden bir sunucuya bağlanın veya yeni bir yerel terminal açın.'
+    welcomeText: 'Soldaki listeden bir sunucuya bağlanın veya yeni bir yerel terminal açın.'
   },
   snippets: {
     title: 'Komut Parçacıkları',

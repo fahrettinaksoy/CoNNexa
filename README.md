@@ -6,14 +6,14 @@ SSH / RDP / VNC / Telnet **Uzak Erişim Yöneticisi** — Vue 3 + **Tauri v2 (Ru
 
 ## Teknoloji Stack'i
 
-| Katman | Teknoloji |
-| --- | --- |
-| UI | Vue 3 (Composition API) · Vuetify · Pinia · Vue Router · Vue I18n (TR/EN) · VueUse |
-| Masaüstü | **Tauri v2** (Rust arka uç + sistem WebView) + Vite |
-| Terminal | @xterm/xterm (WebGL hızlandırmalı) |
+| Katman      | Teknoloji                                                                                                                                                                                                                                                                  |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| UI          | Vue 3 (Composition API) · Vuetify · Pinia · Vue Router · Vue I18n (TR/EN) · VueUse                                                                                                                                                                                         |
+| Masaüstü    | **Tauri v2** (Rust arka uç + sistem WebView) + Vite                                                                                                                                                                                                                        |
+| Terminal    | @xterm/xterm (WebGL hızlandırmalı)                                                                                                                                                                                                                                         |
 | Protokoller | SSH/SFTP: `russh` + `russh-sftp` · Yerel terminal: `portable-pty` · Telnet: ham TCP (tokio) · Serial: `serialport` · VNC: `@novnc/novnc` (Rust TCP↔WS köprüsü) · RDP: harici istemci (mstsc/xfreerdp) + uygulama içi `ironrdp-wasm` (RDCleanPath proxy'si Rust'ta sürüyor) |
-| Ağ/Kripto | Sync/cloud/AI: `reqwest` · Payload: `scrypt` + AES-256-GCM · At-rest sırlar: OS anahtarlığı (`keyring`) + AES-256-GCM |
-| Güvenlik | Sırlar OS anahtarlığında şifrelenir; WebView'a düz metin credential gitmez. Tüm ağ/PTY/kripto işleri Rust arka uçta yaşar. |
+| Ağ/Kripto   | Sync/cloud/AI: `reqwest` · Payload: `scrypt` + AES-256-GCM · At-rest sırlar: OS anahtarlığı (`keyring`) + AES-256-GCM                                                                                                                                                      |
+| Güvenlik    | Sırlar OS anahtarlığında şifrelenir; WebView'a düz metin credential gitmez. Tüm ağ/PTY/kripto işleri Rust arka uçta yaşar.                                                                                                                                                 |
 
 ## Mimari
 

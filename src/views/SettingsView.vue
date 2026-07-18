@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import type { AlarmConfig, ImportSummary } from '@shared/types'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSettingsStore } from '@/stores/settings'
-import { useVaultStore } from '@/stores/vault'
-import { usePluginsStore } from '@/stores/plugins'
-import { useResponsive } from '@/composables/useResponsive'
+import { TERMINAL_THEMES } from '@/composables/terminalThemes'
 import { useAppLocale } from '@/composables/useAppLocale'
 import { useAppTheme } from '@/composables/useAppTheme'
-import { TERMINAL_THEMES } from '@/composables/terminalThemes'
-import { onMounted } from 'vue'
-import type { ImportSummary, AlarmConfig } from '@shared/types'
+import { useResponsive } from '@/composables/useResponsive'
+import { usePluginsStore } from '@/stores/plugins'
+import { useSettingsStore } from '@/stores/settings'
+import { useVaultStore } from '@/stores/vault'
 
 const { t } = useI18n()
 const { current: localeModel, locales } = useAppLocale()
@@ -187,13 +186,29 @@ const terminalThemeModel = computed({
       color="primary"
       class="settings-nav flex-grow-0 py-2"
     >
-      <v-tab value="general" prepend-icon="mdi-tune-variant" :text="t('settings.sections.general')" />
+      <v-tab
+        value="general"
+        prepend-icon="mdi-tune-variant"
+        :text="t('settings.sections.general')"
+      />
       <v-tab value="importer" prepend-icon="mdi-import" :text="t('settings.sections.importer')" />
       <v-tab value="cloud" prepend-icon="mdi-cloud-outline" :text="t('settings.sections.cloud')" />
-      <v-tab value="alarm" prepend-icon="mdi-bell-alert-outline" :text="t('settings.sections.alarm')" />
+      <v-tab
+        value="alarm"
+        prepend-icon="mdi-bell-alert-outline"
+        :text="t('settings.sections.alarm')"
+      />
       <v-tab value="ai" prepend-icon="mdi-robot-outline" :text="t('settings.sections.ai')" />
-      <v-tab value="plugins" prepend-icon="mdi-puzzle-outline" :text="t('settings.sections.plugins')" />
-      <v-tab value="recording" prepend-icon="mdi-record-circle-outline" :text="t('settings.sections.recording')" />
+      <v-tab
+        value="plugins"
+        prepend-icon="mdi-puzzle-outline"
+        :text="t('settings.sections.plugins')"
+      />
+      <v-tab
+        value="recording"
+        prepend-icon="mdi-record-circle-outline"
+        :text="t('settings.sections.recording')"
+      />
       <v-tab value="display" prepend-icon="mdi-monitor" :text="t('settings.sections.display')" />
     </v-tabs>
 
@@ -208,52 +223,52 @@ const terminalThemeModel = computed({
             prepend-inner-icon="mdi-translate"
           />
           <div class="text-caption text-medium-emphasis mb-1">{{ t('settings.theme') }}</div>
-      <v-btn-toggle
-        v-model="themeMode"
-        mandatory
-        divided
-        color="primary"
-        variant="outlined"
-        class="mb-4 d-flex"
-      >
-        <v-btn
-          v-for="m in themeModes"
-          :key="m.value"
-          :value="m.value"
-          :prepend-icon="m.icon"
-          class="flex-grow-1"
-        >
-          {{ t(m.labelKey) }}
-        </v-btn>
-      </v-btn-toggle>
-      <!-- Canlı tema önizlemesi: her kutu, genel temadan bağımsız olarak ilgili
+          <v-btn-toggle
+            v-model="themeMode"
+            mandatory
+            divided
+            color="primary"
+            variant="outlined"
+            class="mb-4 d-flex"
+          >
+            <v-btn
+              v-for="m in themeModes"
+              :key="m.value"
+              :value="m.value"
+              :prepend-icon="m.icon"
+              class="flex-grow-1"
+            >
+              {{ t(m.labelKey) }}
+            </v-btn>
+          </v-btn-toggle>
+          <!-- Canlı tema önizlemesi: her kutu, genel temadan bağımsız olarak ilgili
            temayı VThemeProvider ile scope'lar; kullanıcı seçmeden iki temayı görür. -->
-      <div class="d-flex ga-3 mb-4">
-        <v-theme-provider
-          v-for="p in themePreviews"
-          :key="p.theme"
-          :theme="p.theme"
-          with-background
-          class="theme-preview flex-1-1 rounded-lg pa-3"
-        >
-          <div class="d-flex align-center justify-space-between mb-2">
-            <span class="text-caption font-weight-medium">{{ t(p.labelKey) }}</span>
-            <v-icon :icon="p.icon" size="small" class="text-medium-emphasis" />
+          <div class="d-flex ga-3 mb-4">
+            <v-theme-provider
+              v-for="p in themePreviews"
+              :key="p.theme"
+              :theme="p.theme"
+              with-background
+              class="theme-preview flex-1-1 rounded-lg pa-3"
+            >
+              <div class="d-flex align-center justify-space-between mb-2">
+                <span class="text-caption font-weight-medium">{{ t(p.labelKey) }}</span>
+                <v-icon :icon="p.icon" size="small" class="text-medium-emphasis" />
+              </div>
+              <div class="d-flex ga-2 align-center">
+                <v-btn size="small" color="primary" variant="flat">Aa</v-btn>
+                <v-chip size="small" color="secondary" variant="tonal">chip</v-chip>
+                <v-icon icon="mdi-circle" size="small" color="success" />
+                <v-icon icon="mdi-circle" size="small" color="error" />
+              </div>
+            </v-theme-provider>
           </div>
-          <div class="d-flex ga-2 align-center">
-            <v-btn size="small" color="primary" variant="flat">Aa</v-btn>
-            <v-chip size="small" color="secondary" variant="tonal">chip</v-chip>
-            <v-icon icon="mdi-circle" size="small" color="success" />
-            <v-icon icon="mdi-circle" size="small" color="error" />
-          </div>
-        </v-theme-provider>
-      </div>
-      <v-select
-        v-model="terminalThemeModel"
-        :items="terminalThemeItems"
-        :label="t('settings.terminalTheme')"
-        prepend-inner-icon="mdi-palette-outline"
-      />
+          <v-select
+            v-model="terminalThemeModel"
+            :items="terminalThemeItems"
+            :label="t('settings.terminalTheme')"
+            prepend-inner-icon="mdi-palette-outline"
+          />
         </v-card>
       </v-tabs-window-item>
 
@@ -261,41 +276,41 @@ const terminalThemeModel = computed({
       <v-tabs-window-item value="importer">
         <v-card class="pa-4">
           <div class="text-body-2 text-medium-emphasis mb-4">{{ t('importer.description') }}</div>
-      <div class="d-flex flex-wrap ga-2">
-        <v-btn
-          variant="tonal"
-          prepend-icon="mdi-console-network"
-          :loading="importing"
-          @click="runImport('sshConfig')"
-        >
-          {{ t('importer.sshConfig') }}
-        </v-btn>
-        <v-btn
-          variant="tonal"
-          prepend-icon="mdi-file-xml-box"
-          :loading="importing"
-          @click="runImport('mremoteng')"
-        >
-          {{ t('importer.mremoteng') }}
-        </v-btn>
-        <v-btn
-          variant="tonal"
-          prepend-icon="mdi-code-json"
-          :loading="importing"
-          @click="runImport('termius')"
-        >
-          {{ t('importer.termius') }}
-        </v-btn>
-      </div>
-      <v-alert v-if="importResult" type="success" class="mt-4">
-        {{ importResult }}
-      </v-alert>
-      <v-alert v-if="importError" type="error" class="mt-4">
-        {{ importError }}
-      </v-alert>
-      <div class="text-caption text-medium-emphasis mt-3">
-        {{ t('importer.passwordNote') }}
-      </div>
+          <div class="d-flex flex-wrap ga-2">
+            <v-btn
+              variant="tonal"
+              prepend-icon="mdi-console-network"
+              :loading="importing"
+              @click="runImport('sshConfig')"
+            >
+              {{ t('importer.sshConfig') }}
+            </v-btn>
+            <v-btn
+              variant="tonal"
+              prepend-icon="mdi-file-xml-box"
+              :loading="importing"
+              @click="runImport('mremoteng')"
+            >
+              {{ t('importer.mremoteng') }}
+            </v-btn>
+            <v-btn
+              variant="tonal"
+              prepend-icon="mdi-code-json"
+              :loading="importing"
+              @click="runImport('termius')"
+            >
+              {{ t('importer.termius') }}
+            </v-btn>
+          </div>
+          <v-alert v-if="importResult" type="success" class="mt-4">
+            {{ importResult }}
+          </v-alert>
+          <v-alert v-if="importError" type="error" class="mt-4">
+            {{ importError }}
+          </v-alert>
+          <div class="text-caption text-medium-emphasis mt-3">
+            {{ t('importer.passwordNote') }}
+          </div>
         </v-card>
       </v-tabs-window-item>
 
@@ -303,41 +318,41 @@ const terminalThemeModel = computed({
       <v-tabs-window-item value="cloud">
         <v-card class="pa-4">
           <div class="text-body-2 text-medium-emphasis mb-4">{{ t('cloud.description') }}</div>
-      <v-select
-        v-model="cloudProvider"
-        :items="cloudProviderItems"
-        :label="t('cloud.provider')"
-        prepend-inner-icon="mdi-cloud-outline"
-      />
-      <v-text-field
-        v-model="cloudToken"
-        :label="t('cloud.token')"
-        type="password"
-        autocomplete="off"
-      />
-      <v-select
-        v-model="cloudIdentityId"
-        :items="identityItems"
-        :label="t('cloud.identity')"
-        :hint="t('cloud.identityHint')"
-        persistent-hint
-        clearable
-      />
-      <div class="d-flex justify-end mt-3">
-        <v-btn
-          color="primary"
-          variant="flat"
-          prepend-icon="mdi-cloud-download-outline"
-          :loading="cloudBusy"
-          :disabled="!cloudToken"
-          @click="importCloud"
-        >
-          {{ t('cloud.import') }}
-        </v-btn>
-      </div>
-      <v-alert v-if="cloudMessage" :type="cloudMessage.type" class="mt-4">
-        {{ cloudMessage.text }}
-      </v-alert>
+          <v-select
+            v-model="cloudProvider"
+            :items="cloudProviderItems"
+            :label="t('cloud.provider')"
+            prepend-inner-icon="mdi-cloud-outline"
+          />
+          <v-text-field
+            v-model="cloudToken"
+            :label="t('cloud.token')"
+            type="password"
+            autocomplete="off"
+          />
+          <v-select
+            v-model="cloudIdentityId"
+            :items="identityItems"
+            :label="t('cloud.identity')"
+            :hint="t('cloud.identityHint')"
+            persistent-hint
+            clearable
+          />
+          <div class="d-flex justify-end mt-3">
+            <v-btn
+              color="primary"
+              variant="flat"
+              prepend-icon="mdi-cloud-download-outline"
+              :loading="cloudBusy"
+              :disabled="!cloudToken"
+              @click="importCloud"
+            >
+              {{ t('cloud.import') }}
+            </v-btn>
+          </div>
+          <v-alert v-if="cloudMessage" :type="cloudMessage.type" class="mt-4">
+            {{ cloudMessage.text }}
+          </v-alert>
         </v-card>
       </v-tabs-window-item>
 
@@ -345,61 +360,52 @@ const terminalThemeModel = computed({
       <v-tabs-window-item value="alarm">
         <v-card class="pa-4">
           <div class="text-body-2 text-medium-emphasis mb-4">{{ t('alarm.description') }}</div>
-      <v-switch
-        v-model="alarm.enabled"
-        :label="t('alarm.enabled')"
-        hide-details
-        class="mb-2"
-      />
-      <v-row>
-        <v-col cols="4">
-          <v-text-field
-            v-model.number="alarm.cpuPercent"
-            :label="t('alarm.cpu')"
-            type="number"
-            suffix="%"
+          <v-switch v-model="alarm.enabled" :label="t('alarm.enabled')" hide-details class="mb-2" />
+          <v-row>
+            <v-col cols="4">
+              <v-text-field
+                v-model.number="alarm.cpuPercent"
+                :label="t('alarm.cpu')"
+                type="number"
+                suffix="%"
+              />
+            </v-col>
+            <v-col cols="4">
+              <v-text-field
+                v-model.number="alarm.memPercent"
+                :label="t('alarm.mem')"
+                type="number"
+                suffix="%"
+              />
+            </v-col>
+            <v-col cols="4">
+              <v-text-field
+                v-model.number="alarm.diskPercent"
+                :label="t('alarm.disk')"
+                type="number"
+                suffix="%"
+              />
+            </v-col>
+          </v-row>
+          <v-select
+            v-model="alarm.notifyType"
+            :items="alarmNotifyItems"
+            :label="t('alarm.notifyType')"
           />
-        </v-col>
-        <v-col cols="4">
           <v-text-field
-            v-model.number="alarm.memPercent"
-            :label="t('alarm.mem')"
-            type="number"
-            suffix="%"
+            v-model="alarm.notifyTarget"
+            :label="t('alarm.notifyTarget')"
+            :placeholder="alarm.notifyType === 'ntfy' ? 'https://ntfy.sh/my-topic' : 'https://...'"
           />
-        </v-col>
-        <v-col cols="4">
-          <v-text-field
-            v-model.number="alarm.diskPercent"
-            :label="t('alarm.disk')"
-            type="number"
-            suffix="%"
-          />
-        </v-col>
-      </v-row>
-      <v-select
-        v-model="alarm.notifyType"
-        :items="alarmNotifyItems"
-        :label="t('alarm.notifyType')"
-      />
-      <v-text-field
-        v-model="alarm.notifyTarget"
-        :label="t('alarm.notifyTarget')"
-        :placeholder="alarm.notifyType === 'ntfy' ? 'https://ntfy.sh/my-topic' : 'https://...'"
-      />
-      <div class="d-flex ga-2 justify-end mt-2">
-        <v-btn variant="text" :disabled="!alarm.notifyTarget" @click="testAlarm">
-          {{ t('alarm.test') }}
-        </v-btn>
-        <v-btn color="primary" variant="tonal" @click="saveAlarm">{{ t('common.save') }}</v-btn>
-      </div>
-      <v-alert
-        v-if="alarmMessage"
-        :type="alarmMessage.type"
-        class="mt-4"
-      >
-        {{ alarmMessage.text }}
-      </v-alert>
+          <div class="d-flex ga-2 justify-end mt-2">
+            <v-btn variant="text" :disabled="!alarm.notifyTarget" @click="testAlarm">
+              {{ t('alarm.test') }}
+            </v-btn>
+            <v-btn color="primary" variant="tonal" @click="saveAlarm">{{ t('common.save') }}</v-btn>
+          </div>
+          <v-alert v-if="alarmMessage" :type="alarmMessage.type" class="mt-4">
+            {{ alarmMessage.text }}
+          </v-alert>
         </v-card>
       </v-tabs-window-item>
 
@@ -407,24 +413,24 @@ const terminalThemeModel = computed({
       <v-tabs-window-item value="ai">
         <v-card class="pa-4">
           <div class="text-body-2 text-medium-emphasis mb-4">{{ t('ai.description') }}</div>
-      <v-text-field
-        v-model="aiModel"
-        :label="t('ai.model')"
-        prepend-inner-icon="mdi-robot-outline"
-      />
-      <v-text-field
-        v-model="aiApiKey"
-        :label="t('ai.apiKey')"
-        :placeholder="aiHasKey ? '••••••••' : ''"
-        type="password"
-        autocomplete="off"
-      />
-      <div class="d-flex justify-end mt-2">
-        <v-btn color="primary" variant="tonal" @click="saveAi">{{ t('common.save') }}</v-btn>
-      </div>
-      <v-alert v-if="aiMessage" type="success" class="mt-4">
-        {{ aiMessage }}
-      </v-alert>
+          <v-text-field
+            v-model="aiModel"
+            :label="t('ai.model')"
+            prepend-inner-icon="mdi-robot-outline"
+          />
+          <v-text-field
+            v-model="aiApiKey"
+            :label="t('ai.apiKey')"
+            :placeholder="aiHasKey ? '••••••••' : ''"
+            type="password"
+            autocomplete="off"
+          />
+          <div class="d-flex justify-end mt-2">
+            <v-btn color="primary" variant="tonal" @click="saveAi">{{ t('common.save') }}</v-btn>
+          </div>
+          <v-alert v-if="aiMessage" type="success" class="mt-4">
+            {{ aiMessage }}
+          </v-alert>
         </v-card>
       </v-tabs-window-item>
 
@@ -432,50 +438,46 @@ const terminalThemeModel = computed({
       <v-tabs-window-item value="plugins">
         <v-card class="pa-4">
           <div class="text-body-2 text-medium-emphasis mb-4">{{ t('plugins.description') }}</div>
-      <div class="d-flex ga-2 mb-3">
-        <v-btn variant="tonal" prepend-icon="mdi-puzzle-plus-outline" @click="plugins.install">
-          {{ t('plugins.install') }}
-        </v-btn>
-        <v-btn variant="text" prepend-icon="mdi-folder-outline" @click="plugins.openFolder">
-          {{ t('plugins.openFolder') }}
-        </v-btn>
-      </div>
-      <div v-if="plugins.plugins.length === 0" class="text-caption text-medium-emphasis">
-        {{ t('plugins.empty') }}
-      </div>
-      <v-list v-else density="compact" class="py-0">
-        <v-list-item
-          v-for="p in plugins.plugins"
-          :key="p.id"
-          :title="`${p.name} · v${p.version}`"
-          :subtitle="p.description || t('plugins.snippetCount', { count: p.snippetCount })"
-          prepend-icon="mdi-puzzle-outline"
-        >
-          <template #append>
-            <v-btn
-              icon="mdi-delete-outline"
-              size="x-small"
-              variant="text"
-              :title="t('common.delete')"
-              @click="plugins.remove(p.id)"
-            />
-          </template>
-        </v-list-item>
-      </v-list>
-      <v-alert v-if="plugins.error" type="error" class="mt-3">
-        {{ plugins.error }}
-      </v-alert>
+          <div class="d-flex ga-2 mb-3">
+            <v-btn variant="tonal" prepend-icon="mdi-puzzle-plus-outline" @click="plugins.install">
+              {{ t('plugins.install') }}
+            </v-btn>
+            <v-btn variant="text" prepend-icon="mdi-folder-outline" @click="plugins.openFolder">
+              {{ t('plugins.openFolder') }}
+            </v-btn>
+          </div>
+          <div v-if="plugins.plugins.length === 0" class="text-caption text-medium-emphasis">
+            {{ t('plugins.empty') }}
+          </div>
+          <v-list v-else density="compact" class="py-0">
+            <v-list-item
+              v-for="p in plugins.plugins"
+              :key="p.id"
+              :title="`${p.name} · v${p.version}`"
+              :subtitle="p.description || t('plugins.snippetCount', { count: p.snippetCount })"
+              prepend-icon="mdi-puzzle-outline"
+            >
+              <template #append>
+                <v-btn
+                  icon="mdi-delete-outline"
+                  size="x-small"
+                  variant="text"
+                  :title="t('common.delete')"
+                  @click="plugins.remove(p.id)"
+                />
+              </template>
+            </v-list-item>
+          </v-list>
+          <v-alert v-if="plugins.error" type="error" class="mt-3">
+            {{ plugins.error }}
+          </v-alert>
         </v-card>
       </v-tabs-window-item>
 
       <!-- Kayıtlar -->
       <v-tabs-window-item value="recording">
         <v-card class="pa-4">
-          <v-btn
-            variant="tonal"
-            prepend-icon="mdi-folder-play-outline"
-            @click="openRecordings"
-          >
+          <v-btn variant="tonal" prepend-icon="mdi-folder-play-outline" @click="openRecordings">
             {{ t('recording.openFolder') }}
           </v-btn>
         </v-card>
@@ -485,41 +487,44 @@ const terminalThemeModel = computed({
       <v-tabs-window-item value="display">
         <v-card class="pa-4">
           <div class="text-body-2 text-medium-emphasis mb-4">{{ t('display.description') }}</div>
-      <v-list class="py-0 bg-transparent">
-        <v-list-item :title="t('display.breakpoint')" prepend-icon="mdi-monitor-screenshot">
-          <template #append>
-            <span class="text-mono text-medium-emphasis">{{ breakpointLabel }}</span>
-          </template>
-        </v-list-item>
-        <v-list-item :title="t('display.layoutMode')" prepend-icon="mdi-view-column-outline">
-          <template #append>
-            <v-chip size="small" :color="compact ? 'warning' : 'primary'" variant="tonal">
-              {{ compact ? t('display.compact') : t('display.expanded') }}
-            </v-chip>
-          </template>
-        </v-list-item>
-        <v-list-item :title="t('display.mobileBreakpoint')" prepend-icon="mdi-cellphone-arrow-down">
-          <template #append>
-            <span class="text-mono text-medium-emphasis">
-              {{ display.mobileBreakpoint.value }}
-            </span>
-          </template>
-        </v-list-item>
-        <v-list-item :title="t('display.platform')" prepend-icon="mdi-chip">
-          <template #append>
-            <div class="d-flex ga-1 flex-wrap justify-end">
-              <v-chip
-                v-for="name in activePlatforms"
-                :key="name"
-                size="x-small"
-                variant="tonal"
-              >
-                {{ name }}
-              </v-chip>
-            </div>
-          </template>
-        </v-list-item>
-      </v-list>
+          <v-list class="py-0 bg-transparent">
+            <v-list-item :title="t('display.breakpoint')" prepend-icon="mdi-monitor-screenshot">
+              <template #append>
+                <span class="text-mono text-medium-emphasis">{{ breakpointLabel }}</span>
+              </template>
+            </v-list-item>
+            <v-list-item :title="t('display.layoutMode')" prepend-icon="mdi-view-column-outline">
+              <template #append>
+                <v-chip size="small" :color="compact ? 'warning' : 'primary'" variant="tonal">
+                  {{ compact ? t('display.compact') : t('display.expanded') }}
+                </v-chip>
+              </template>
+            </v-list-item>
+            <v-list-item
+              :title="t('display.mobileBreakpoint')"
+              prepend-icon="mdi-cellphone-arrow-down"
+            >
+              <template #append>
+                <span class="text-mono text-medium-emphasis">
+                  {{ display.mobileBreakpoint.value }}
+                </span>
+              </template>
+            </v-list-item>
+            <v-list-item :title="t('display.platform')" prepend-icon="mdi-chip">
+              <template #append>
+                <div class="d-flex ga-1 flex-wrap justify-end">
+                  <v-chip
+                    v-for="name in activePlatforms"
+                    :key="name"
+                    size="x-small"
+                    variant="tonal"
+                  >
+                    {{ name }}
+                  </v-chip>
+                </div>
+              </template>
+            </v-list-item>
+          </v-list>
           <div class="text-caption text-medium-emphasis mt-2">{{ t('display.hint') }}</div>
         </v-card>
       </v-tabs-window-item>

@@ -165,7 +165,12 @@ impl VaultStore {
         let cipher = FieldCipher::new(config_dir.clone())?;
         let path = config_dir.join("vault.json");
         let data = Self::load(&path);
-        Ok(Self { path, config_dir, cipher, data })
+        Ok(Self {
+            path,
+            config_dir,
+            cipher,
+            data,
+        })
     }
 
     fn load(path: &std::path::Path) -> VaultFile {
@@ -232,7 +237,11 @@ impl VaultStore {
     // ---- Identities ----
 
     pub fn save_identity(&mut self, req: IdentitySaveRequest) -> Result<IdentityPublic, String> {
-        let id = req.id.clone().filter(|s| !s.is_empty()).unwrap_or_else(new_id);
+        let id = req
+            .id
+            .clone()
+            .filter(|s| !s.is_empty())
+            .unwrap_or_else(new_id);
         let existing = self.data.identities.iter().find(|i| i.id == id).cloned();
 
         let password_enc = match &req.password {
@@ -386,7 +395,11 @@ impl VaultStore {
             Some(enc) => Some(self.decrypt(enc)?),
             None => None,
         };
-        Ok(ResolvedSecrets { identity, password, passphrase })
+        Ok(ResolvedSecrets {
+            identity,
+            password,
+            passphrase,
+        })
     }
 
     // ---- Sync config ----
@@ -587,7 +600,11 @@ impl VaultStore {
 
     pub fn save_team_vault(&mut self, input: TeamVaultInput) -> Result<TeamVaultPublic, String> {
         let mut list = self.team_vaults();
-        let id = input.id.clone().filter(|s| !s.is_empty()).unwrap_or_else(new_id);
+        let id = input
+            .id
+            .clone()
+            .filter(|s| !s.is_empty())
+            .unwrap_or_else(new_id);
         let existing = list.iter().find(|t| t.id == id).cloned();
         let mut stored = existing.unwrap_or(TeamVaultStored {
             id: id.clone(),
@@ -657,10 +674,16 @@ impl VaultStore {
     }
 
     pub fn get_team_backend(&self, id: &str) -> Option<TeamBackend> {
-        self.team_vaults().into_iter().find(|t| t.id == id).map(|t| t.backend)
+        self.team_vaults()
+            .into_iter()
+            .find(|t| t.id == id)
+            .map(|t| t.backend)
     }
     pub fn team_gist_id(&self, id: &str) -> Option<String> {
-        self.team_vaults().into_iter().find(|t| t.id == id).and_then(|t| t.gist_id)
+        self.team_vaults()
+            .into_iter()
+            .find(|t| t.id == id)
+            .and_then(|t| t.gist_id)
     }
     pub fn team_webdav(&self, id: &str) -> (Option<String>, Option<String>) {
         match self.team_vaults().into_iter().find(|t| t.id == id) {
@@ -669,7 +692,10 @@ impl VaultStore {
         }
     }
 
-    pub fn resolve_team_secrets(&self, id: &str) -> Result<(Option<String>, Option<String>), String> {
+    pub fn resolve_team_secrets(
+        &self,
+        id: &str,
+    ) -> Result<(Option<String>, Option<String>), String> {
         let t = self
             .team_vaults()
             .into_iter()
@@ -767,14 +793,26 @@ impl VaultStore {
                 team_vault_id: Some(team_id.to_string()),
             })
             .collect();
-        PortableVault { hosts, identities, groups, snippets, tunnels: vec![] }
+        PortableVault {
+            hosts,
+            identities,
+            groups,
+            snippets,
+            tunnels: vec![],
+        }
     }
 
     /// Eski ekip öğelerini sil + değiştir; YEREL identity sırlarını id bazında koru.
     pub fn replace_team(&mut self, team_id: &str, data: PortableVault) -> Result<(), String> {
-        self.data.hosts.retain(|h| h.team_vault_id.as_deref() != Some(team_id));
-        self.data.groups.retain(|g| g.team_vault_id.as_deref() != Some(team_id));
-        self.data.snippets.retain(|s| s.team_vault_id.as_deref() != Some(team_id));
+        self.data
+            .hosts
+            .retain(|h| h.team_vault_id.as_deref() != Some(team_id));
+        self.data
+            .groups
+            .retain(|g| g.team_vault_id.as_deref() != Some(team_id));
+        self.data
+            .snippets
+            .retain(|s| s.team_vault_id.as_deref() != Some(team_id));
 
         for mut h in data.hosts {
             h.team_vault_id = Some(team_id.to_string());
@@ -822,14 +860,33 @@ impl VaultStore {
         use std::collections::HashMap;
         let mut group_ids: HashMap<String, String> = HashMap::new();
         let mut identity_ids: HashMap<String, String> = HashMap::new();
-        let mut summary = ImportSummary { ok: true, error: None, canceled: None, hosts: 0, identities: 0, groups: 0, skipped: 0 };
+        let mut summary = ImportSummary {
+            ok: true,
+            error: None,
+            canceled: None,
+            hosts: 0,
+            identities: 0,
+            groups: 0,
+            skipped: 0,
+        };
 
         // Gruplar (önce oluştur, sonra parent bağla)
         for g in &parsed.groups {
-            let existing = self.data.groups.iter().find(|x| x.name == g.name).map(|x| x.id.clone());
+            let existing = self
+                .data
+                .groups
+                .iter()
+                .find(|x| x.name == g.name)
+                .map(|x| x.id.clone());
             let id = existing.unwrap_or_else(|| {
                 let id = new_id();
-                self.data.groups.push(Group { id: id.clone(), name: g.name.clone(), parent_id: None, identity_id: None, team_vault_id: None });
+                self.data.groups.push(Group {
+                    id: id.clone(),
+                    name: g.name.clone(),
+                    parent_id: None,
+                    identity_id: None,
+                    team_vault_id: None,
+                });
                 summary.groups += 1;
                 id
             });
@@ -837,7 +894,8 @@ impl VaultStore {
         }
         for g in &parsed.groups {
             if let Some(parent_name) = &g.parent_name {
-                if let (Some(gid), Some(pid)) = (group_ids.get(&g.name), group_ids.get(parent_name)) {
+                if let (Some(gid), Some(pid)) = (group_ids.get(&g.name), group_ids.get(parent_name))
+                {
                     let gid = gid.clone();
                     let pid = pid.clone();
                     if let Some(grp) = self.data.groups.iter_mut().find(|x| x.id == gid) {
@@ -849,7 +907,12 @@ impl VaultStore {
 
         // Kimlikler (ada göre dedup)
         for i in &parsed.identities {
-            let existing = self.data.identities.iter().find(|x| x.name == i.name).map(|x| x.id.clone());
+            let existing = self
+                .data
+                .identities
+                .iter()
+                .find(|x| x.name == i.name)
+                .map(|x| x.id.clone());
             let id = existing.unwrap_or_else(|| {
                 let id = new_id();
                 self.data.identities.push(Identity {
@@ -871,13 +934,24 @@ impl VaultStore {
 
         // Hostlar (hostname+port+protocol dedup)
         for h in &parsed.hosts {
-            let dup = self.data.hosts.iter().any(|x| x.hostname == h.hostname && x.port == h.port && x.protocol == h.protocol);
+            let dup =
+                self.data.hosts.iter().any(|x| {
+                    x.hostname == h.hostname && x.port == h.port && x.protocol == h.protocol
+                });
             if dup {
                 summary.skipped += 1;
                 continue;
             }
-            let identity_id = h.identity_name.as_ref().and_then(|n| identity_ids.get(n)).cloned();
-            let group_id = h.group_name.as_ref().and_then(|n| group_ids.get(n)).cloned();
+            let identity_id = h
+                .identity_name
+                .as_ref()
+                .and_then(|n| identity_ids.get(n))
+                .cloned();
+            let group_id = h
+                .group_name
+                .as_ref()
+                .and_then(|n| group_ids.get(n))
+                .cloned();
             self.data.hosts.push(Host {
                 id: new_id(),
                 name: h.name.clone(),
@@ -909,19 +983,37 @@ impl VaultStore {
         servers: Vec<(String, String)>, // (name, ip)
         identity_id: Option<String>,
     ) -> ImportSummary {
-        let mut summary = ImportSummary { ok: true, error: None, canceled: None, hosts: 0, identities: 0, groups: 0, skipped: 0 };
+        let mut summary = ImportSummary {
+            ok: true,
+            error: None,
+            canceled: None,
+            hosts: 0,
+            identities: 0,
+            groups: 0,
+            skipped: 0,
+        };
         // Grup
         let group_id = match self.data.groups.iter().find(|g| g.name == provider) {
             Some(g) => g.id.clone(),
             None => {
                 let id = new_id();
-                self.data.groups.push(Group { id: id.clone(), name: provider.to_string(), parent_id: None, identity_id: None, team_vault_id: None });
+                self.data.groups.push(Group {
+                    id: id.clone(),
+                    name: provider.to_string(),
+                    parent_id: None,
+                    identity_id: None,
+                    team_vault_id: None,
+                });
                 summary.groups += 1;
                 id
             }
         };
         for (name, ip) in servers {
-            let dup = self.data.hosts.iter().any(|h| h.hostname == ip && h.port == 22 && h.protocol == Protocol::Ssh);
+            let dup = self
+                .data
+                .hosts
+                .iter()
+                .any(|h| h.hostname == ip && h.port == 22 && h.protocol == Protocol::Ssh);
             if dup {
                 summary.skipped += 1;
                 continue;

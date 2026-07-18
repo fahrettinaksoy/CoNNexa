@@ -1,13 +1,13 @@
-import { createVuetify } from 'vuetify'
-import { aliases as mdiAliases, mdi } from 'vuetify/iconsets/mdi'
 import { useI18n } from 'vue-i18n'
+import { createVuetify } from 'vuetify'
+import { mdi, aliases as mdiAliases } from 'vuetify/iconsets/mdi'
 import { createVueI18nAdapter } from 'vuetify/locale/adapters/vue-i18n'
-import 'vuetify/styles'
-import '@mdi/font/css/materialdesignicons.css'
+import { i18n } from '@/i18n'
+import { connexaDefaults } from './defaults'
 import { appAliases } from './icons'
 import { connexaThemes } from './theme'
-import { connexaDefaults } from './defaults'
-import { i18n } from '@/i18n'
+import 'vuetify/styles'
+import '@mdi/font/css/materialdesignicons.css'
 
 // Kalıcı tema modunu ('system' | 'light' | 'dark') açılışta uygula; böylece
 // ilk boyamada yanlış tema görünüp anında değişmez (FOUC yok). 'system' ise

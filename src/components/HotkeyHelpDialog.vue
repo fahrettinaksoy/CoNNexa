@@ -1,11 +1,8 @@
 <script setup lang="ts">
+import type { ShortcutCategory } from '@/composables/keymap'
 import { useI18n } from 'vue-i18n'
 import SideSheet from '@/components/SideSheet.vue'
-import {
-  SHORTCUTS_BY_CATEGORY,
-  CATEGORY_ORDER,
-  type ShortcutCategory
-} from '@/composables/keymap'
+import { CATEGORY_ORDER, SHORTCUTS_BY_CATEGORY } from '@/composables/keymap'
 
 const open = defineModel<boolean>({ default: false })
 

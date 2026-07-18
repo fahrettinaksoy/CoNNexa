@@ -10,7 +10,8 @@ use tauri::AppHandle;
 
 use crate::events::{emit_ai_delta, emit_ai_done, emit_ai_error};
 
-const SYSTEM_PROMPT: &str = "Sen bir kabuk (shell) komut asistanısın. Kullanıcının isteğine karşılık \
+const SYSTEM_PROMPT: &str =
+    "Sen bir kabuk (shell) komut asistanısın. Kullanıcının isteğine karşılık \
 tek satırlık kısa bir açıklama ver, ardından çalıştırılacak komutu ```bash kod bloğu içinde ver. \
 Tehlikeli komutlarda (silme, format, sistem değişikliği) açıkça uyar. Türkçe yanıtla.";
 
@@ -50,18 +51,29 @@ impl AiService {
             }
         };
         let cancel = Arc::new(AtomicBool::new(false));
-        self.cancels.lock().unwrap().insert(request_id.clone(), cancel.clone());
+        self.cancels
+            .lock()
+            .unwrap()
+            .insert(request_id.clone(), cancel.clone());
 
         let cancels = self.cancels.clone();
         tauri::async_runtime::spawn(async move {
             let user_content = match context {
                 Some(ctx) if !ctx.is_empty() => {
-                    let tail: String = ctx.chars().rev().take(2000).collect::<Vec<_>>().into_iter().rev().collect();
+                    let tail: String = ctx
+                        .chars()
+                        .rev()
+                        .take(2000)
+                        .collect::<Vec<_>>()
+                        .into_iter()
+                        .rev()
+                        .collect();
                     format!("Bağlam (terminal çıktısı):\n{tail}\n\nGörev: {prompt}")
                 }
                 _ => prompt,
             };
-            let result = stream_messages(&app, &request_id, &model, &api_key, &user_content, &cancel).await;
+            let result =
+                stream_messages(&app, &request_id, &model, &api_key, &user_content, &cancel).await;
             match result {
                 Ok(()) => emit_ai_done(&app, &request_id),
                 Err(e) => {
@@ -129,13 +141,21 @@ async fn stream_messages(
                 if let Ok(v) = serde_json::from_str::<serde_json::Value>(data) {
                     let t = v.get("type").and_then(|x| x.as_str()).unwrap_or("");
                     if t == "content_block_delta" {
-                        if let Some(text) = v.get("delta").and_then(|d| d.get("text")).and_then(|x| x.as_str()) {
+                        if let Some(text) = v
+                            .get("delta")
+                            .and_then(|d| d.get("text"))
+                            .and_then(|x| x.as_str())
+                        {
                             emit_ai_delta(app, request_id, text);
                         }
                     } else if t == "message_stop" {
                         return Ok(());
                     } else if t == "error" {
-                        let msg = v.get("error").and_then(|e| e.get("message")).and_then(|x| x.as_str()).unwrap_or("bilinmeyen hata");
+                        let msg = v
+                            .get("error")
+                            .and_then(|e| e.get("message"))
+                            .and_then(|x| x.as_str())
+                            .unwrap_or("bilinmeyen hata");
                         return Err(msg.to_string());
                     }
                 }

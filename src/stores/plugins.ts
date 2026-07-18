@@ -1,6 +1,6 @@
+import type { PluginInfo, Snippet } from '@shared/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { PluginInfo, Snippet } from '@shared/types'
 
 /**
  * Yüklü plugin'ler ve kattıkları snippet'ler. Plugin snippet'leri salt okunurdur

@@ -93,7 +93,11 @@ impl SessionManager {
     }
 
     fn sink(&self, id: &str) -> OutputSink {
-        OutputSink { app: self.app.clone(), recorders: self.recorders.clone(), id: id.to_string() }
+        OutputSink {
+            app: self.app.clone(),
+            recorders: self.recorders.clone(),
+            id: id.to_string(),
+        }
     }
 
     fn insert(&self, id: String, session: LiveSession) {
@@ -106,7 +110,12 @@ impl SessionManager {
         let id = new_id();
         let pty = native_pty_system();
         let pair = pty
-            .openpty(PtySize { rows, cols, pixel_width: 0, pixel_height: 0 })
+            .openpty(PtySize {
+                rows,
+                cols,
+                pixel_width: 0,
+                pixel_height: 0,
+            })
             .map_err(|e| format!("pty açılamadı: {e}"))?;
 
         let shell = default_shell();
@@ -153,7 +162,14 @@ impl SessionManager {
         });
 
         let descriptor = descriptor(&id, "Yerel", Protocol::Local, None);
-        self.insert(id, LiveSession { descriptor: descriptor.clone(), io: SessionIo::Pty(io), ssh: None });
+        self.insert(
+            id,
+            LiveSession {
+                descriptor: descriptor.clone(),
+                io: SessionIo::Pty(io),
+                ssh: None,
+            },
+        );
         Ok(descriptor)
     }
 
@@ -216,7 +232,11 @@ impl SessionManager {
         let descriptor = descriptor(&id, &title, Protocol::Ssh, Some(host_id));
         self.insert(
             id,
-            LiveSession { descriptor: descriptor.clone(), io: SessionIo::Channel(tx), ssh: Some(handle) },
+            LiveSession {
+                descriptor: descriptor.clone(),
+                io: SessionIo::Channel(tx),
+                ssh: Some(handle),
+            },
         );
         Ok(descriptor)
     }
@@ -260,7 +280,14 @@ impl SessionManager {
         });
 
         let descriptor = descriptor(&id, &title, Protocol::Telnet, Some(host_id));
-        self.insert(id, LiveSession { descriptor: descriptor.clone(), io: SessionIo::Channel(tx), ssh: None });
+        self.insert(
+            id,
+            LiveSession {
+                descriptor: descriptor.clone(),
+                io: SessionIo::Channel(tx),
+                ssh: None,
+            },
+        );
         Ok(descriptor)
     }
 
@@ -277,7 +304,9 @@ impl SessionManager {
             .timeout(std::time::Duration::from_millis(200))
             .open()
             .map_err(|e| format!("serial açılamadı: {e}"))?;
-        let mut reader = port.try_clone().map_err(|e| format!("serial klonlanamadı: {e}"))?;
+        let mut reader = port
+            .try_clone()
+            .map_err(|e| format!("serial klonlanamadı: {e}"))?;
         let running = Arc::new(AtomicBool::new(true));
         let id = new_id();
 
@@ -303,7 +332,10 @@ impl SessionManager {
             id,
             LiveSession {
                 descriptor: descriptor.clone(),
-                io: SessionIo::Serial { writer: StdMutex::new(port), running },
+                io: SessionIo::Serial {
+                    writer: StdMutex::new(port),
+                    running,
+                },
                 ssh: None,
             },
         );
@@ -318,7 +350,14 @@ impl SessionManager {
         on_close: Option<Box<dyn FnOnce() + Send>>,
     ) {
         let id = descriptor.id.clone();
-        self.insert(id, LiveSession { descriptor, io: SessionIo::Passive(on_close), ssh: None });
+        self.insert(
+            id,
+            LiveSession {
+                descriptor,
+                io: SessionIo::Passive(on_close),
+                ssh: None,
+            },
+        );
     }
 
     // ---- I/O ----
@@ -355,7 +394,12 @@ impl SessionManager {
                 }
                 SessionIo::Pty(io) => {
                     if let Ok(m) = io.master.lock() {
-                        let _ = m.resize(PtySize { rows, cols, pixel_width: 0, pixel_height: 0 });
+                        let _ = m.resize(PtySize {
+                            rows,
+                            cols,
+                            pixel_width: 0,
+                            pixel_height: 0,
+                        });
                     }
                 }
                 _ => {}
@@ -392,7 +436,11 @@ impl SessionManager {
     }
 
     pub fn get_ssh(&self, id: &str) -> Option<SshHandle> {
-        self.sessions.lock().unwrap().get(id).and_then(|s| s.ssh.clone())
+        self.sessions
+            .lock()
+            .unwrap()
+            .get(id)
+            .and_then(|s| s.ssh.clone())
     }
 
     /// Aktif SSH oturumları: (session_id, başlık).
@@ -429,7 +477,10 @@ impl SessionManager {
         let dir = recordings_dir(config_dir);
         let path = dir.join(make_filename(title));
         let writer = RecordingWriter::new(path.clone(), title, cols, rows)?;
-        self.recorders.lock().unwrap().insert(id.to_string(), writer);
+        self.recorders
+            .lock()
+            .unwrap()
+            .insert(id.to_string(), writer);
         Ok(path)
     }
 
@@ -442,7 +493,12 @@ impl SessionManager {
     }
 }
 
-fn descriptor(id: &str, title: &str, protocol: Protocol, host_id: Option<String>) -> SessionDescriptor {
+fn descriptor(
+    id: &str,
+    title: &str,
+    protocol: Protocol,
+    host_id: Option<String>,
+) -> SessionDescriptor {
     SessionDescriptor {
         id: id.to_string(),
         title: title.to_string(),
@@ -466,5 +522,7 @@ fn default_shell() -> String {
 }
 
 fn home_dir() -> Option<String> {
-    std::env::var("HOME").ok().or_else(|| std::env::var("USERPROFILE").ok())
+    std::env::var("HOME")
+        .ok()
+        .or_else(|| std::env::var("USERPROFILE").ok())
 }

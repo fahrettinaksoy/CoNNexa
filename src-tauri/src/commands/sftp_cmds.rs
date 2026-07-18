@@ -7,12 +7,21 @@ use crate::sftp::posix_join;
 use crate::state::AppState;
 use crate::types::{SftpEntry, SftpResult};
 
-async fn handle_for(state: &State<'_, AppState>, session_id: &str) -> Result<crate::ssh::SshHandle, String> {
-    state.sessions.get_ssh(session_id).ok_or_else(|| "SSH oturumu bulunamadı".to_string())
+async fn handle_for(
+    state: &State<'_, AppState>,
+    session_id: &str,
+) -> Result<crate::ssh::SshHandle, String> {
+    state
+        .sessions
+        .get_ssh(session_id)
+        .ok_or_else(|| "SSH oturumu bulunamadı".to_string())
 }
 
 #[tauri::command]
-pub async fn sftp_home(state: State<'_, AppState>, session_id: String) -> Result<SftpResult<String>, String> {
+pub async fn sftp_home(
+    state: State<'_, AppState>,
+    session_id: String,
+) -> Result<SftpResult<String>, String> {
     let handle = match handle_for(&state, &session_id).await {
         Ok(h) => h,
         Err(e) => return Ok(SftpResult::err(e)),
@@ -50,7 +59,11 @@ pub async fn sftp_mkdir(
         Err(e) => return Ok(SftpResult::err(e)),
     };
     Ok(match state.sftp.mkdir(&session_id, &handle, &path).await {
-        Ok(()) => SftpResult { ok: true, error: None, data: None },
+        Ok(()) => SftpResult {
+            ok: true,
+            error: None,
+            data: None,
+        },
         Err(e) => SftpResult::err(e),
     })
 }
@@ -66,10 +79,16 @@ pub async fn sftp_rename(
         Ok(h) => h,
         Err(e) => return Ok(SftpResult::err(e)),
     };
-    Ok(match state.sftp.rename(&session_id, &handle, &from, &to).await {
-        Ok(()) => SftpResult { ok: true, error: None, data: None },
-        Err(e) => SftpResult::err(e),
-    })
+    Ok(
+        match state.sftp.rename(&session_id, &handle, &from, &to).await {
+            Ok(()) => SftpResult {
+                ok: true,
+                error: None,
+                data: None,
+            },
+            Err(e) => SftpResult::err(e),
+        },
+    )
 }
 
 #[tauri::command]
@@ -83,10 +102,16 @@ pub async fn sftp_delete(
         Ok(h) => h,
         Err(e) => return Ok(SftpResult::err(e)),
     };
-    Ok(match state.sftp.delete(&session_id, &handle, &path, is_dir).await {
-        Ok(()) => SftpResult { ok: true, error: None, data: None },
-        Err(e) => SftpResult::err(e),
-    })
+    Ok(
+        match state.sftp.delete(&session_id, &handle, &path, is_dir).await {
+            Ok(()) => SftpResult {
+                ok: true,
+                error: None,
+                data: None,
+            },
+            Err(e) => SftpResult::err(e),
+        },
+    )
 }
 
 #[tauri::command]
@@ -100,16 +125,27 @@ pub async fn sftp_download(
         Ok(h) => h,
         Err(e) => return Ok(SftpResult::err(e)),
     };
-    let data = match state.sftp.read_file(&session_id, &handle, &remote_path).await {
+    let data = match state
+        .sftp
+        .read_file(&session_id, &handle, &remote_path)
+        .await
+    {
         Ok(d) => d,
         Err(e) => return Ok(SftpResult::err(e)),
     };
-    let basename = remote_path.rsplit('/').next().unwrap_or("indirilen").to_string();
+    let basename = remote_path
+        .rsplit('/')
+        .next()
+        .unwrap_or("indirilen")
+        .to_string();
 
     let (tx, rx) = tokio::sync::oneshot::channel();
-    app.dialog().file().set_file_name(&basename).save_file(move |p| {
-        let _ = tx.send(p);
-    });
+    app.dialog()
+        .file()
+        .set_file_name(&basename)
+        .save_file(move |p| {
+            let _ = tx.send(p);
+        });
     let picked = rx.await.ok().flatten();
     let Some(fp) = picked else {
         return Ok(SftpResult::ok(String::new())); // iptal
@@ -160,7 +196,11 @@ pub async fn sftp_upload(
             Err(e) => return Ok(SftpResult::err(e.to_string())),
         };
         let remote = posix_join(&remote_dir, &name);
-        if let Err(e) = state.sftp.write_file(&session_id, &handle, &remote, &data).await {
+        if let Err(e) = state
+            .sftp
+            .write_file(&session_id, &handle, &remote, &data)
+            .await
+        {
             return Ok(SftpResult::err(e));
         }
         uploaded.push(name);

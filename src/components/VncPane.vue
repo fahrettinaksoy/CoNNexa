@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
+import type { SessionDescriptor } from '@shared/types'
 // noVNC çekirdek istemcisi (MPL-2.0) — paket kökü core/rfb.js'e eşlenir
 import RFB from '@novnc/novnc'
-import type { SessionDescriptor } from '@shared/types'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ session: SessionDescriptor }>()
 
@@ -12,7 +12,6 @@ const container = ref<HTMLDivElement | null>(null)
 const status = ref<'connecting' | 'connected' | 'error'>('connecting')
 const errorMsg = ref('')
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let rfb: any = null
 
 onMounted(() => {
@@ -28,8 +27,7 @@ onMounted(() => {
     })
     rfb.scaleViewport = true
     // Canvas arka planı tema yüzey rengini izler (workbench temasıyla tutarlı).
-    rfb.background =
-      getComputedStyle(container.value).backgroundColor || 'rgb(15, 17, 21)'
+    rfb.background = getComputedStyle(container.value).backgroundColor || 'rgb(15, 17, 21)'
     rfb.addEventListener('connect', () => (status.value = 'connected'))
     rfb.addEventListener('disconnect', (e: CustomEvent) => {
       if (!e.detail?.clean && status.value !== 'connected') {

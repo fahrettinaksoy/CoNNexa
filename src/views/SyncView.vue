@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import type { SyncBackend, SyncConfigPublic, SyncResult } from '@shared/types'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useVaultStore } from '@/stores/vault'
-import type { SyncBackend, SyncConfigPublic, SyncResult } from '@shared/types'
 
 const { t } = useI18n()
 const vault = useVaultStore()
@@ -83,9 +83,7 @@ async function pull(): Promise<void> {
   }
 }
 
-const canSync = computed(
-  () => config.value.backend !== 'none' && passphrase.value.length > 0
-)
+const canSync = computed(() => config.value.backend !== 'none' && passphrase.value.length > 0)
 </script>
 
 <template>

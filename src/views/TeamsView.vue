@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import type { TeamVaultInput, TeamVaultPublic } from '@shared/types'
+import { computed, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
+import CrudDialog from '@/components/CrudDialog.vue'
+import { useRules } from '@/composables/rules'
 import { useTeamsStore } from '@/stores/teams'
 import { useVaultStore } from '@/stores/vault'
-import { useRules } from '@/composables/rules'
-import CrudDialog from '@/components/CrudDialog.vue'
-import type { TeamVaultPublic, TeamVaultInput } from '@shared/types'
 
 const { t } = useI18n()
 const teams = useTeamsStore()
@@ -114,7 +114,11 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
     </div>
     <p class="text-body-2 text-medium-emphasis mb-6">{{ t('teams.description') }}</p>
 
-    <v-card v-if="teams.teams.length === 0" variant="tonal" class="pa-8 text-center text-medium-emphasis">
+    <v-card
+      v-if="teams.teams.length === 0"
+      variant="tonal"
+      class="pa-8 text-center text-medium-emphasis"
+    >
       {{ t('teams.empty') }}
     </v-card>
 
@@ -124,7 +128,13 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
         <span class="text-subtitle-1">{{ tv.name }}</span>
         <v-chip size="x-small" label class="ml-2">{{ tv.backend }}</v-chip>
         <v-spacer />
-        <v-btn icon="mdi-pencil" size="small" variant="text" :title="t('common.edit')" @click="edit(tv)" />
+        <v-btn
+          icon="mdi-pencil"
+          size="small"
+          variant="text"
+          :title="t('common.edit')"
+          @click="edit(tv)"
+        />
         <v-btn
           icon="mdi-delete-outline"
           size="small"
@@ -180,54 +190,38 @@ const showWebdav = computed(() => form.value.backend === 'webdav')
     </div>
 
     <!-- Ekip vault düzenleme -->
-    <CrudDialog
-      v-model="dialog"
-      :title="editing ? t('teams.edit') : t('teams.add')"
-      @save="save"
-    >
-      <v-text-field
-        v-model="form.name"
-        :label="t('teams.name')"
-        :rules="[required]"
-        autofocus
-      />
-          <v-select
-            v-model="form.backend"
-            :items="backendItems"
-            :label="t('teams.backend')"
-          />
-          <template v-if="!showWebdav">
-            <v-text-field
-              v-model="form.gistToken"
-              :label="t('teams.gistToken')"
-              :placeholder="editing?.hasGistToken ? '••••••••' : ''"
-              type="password"
-              autocomplete="off"
-            />
-            <v-text-field
-              v-model="form.gistId"
-              :label="t('teams.gistId')"
-            />
-          </template>
-          <template v-else>
-            <v-text-field
-              v-model="form.webdavUrl"
-              :label="t('teams.webdavUrl')"
-              placeholder="https://dav.example.com/team/"
-            />
-            <v-text-field
-              v-model="form.webdavUsername"
-              :label="t('teams.webdavUsername')"
-              autocomplete="off"
-            />
-            <v-text-field
-              v-model="form.webdavPassword"
-              :label="t('teams.webdavPassword')"
-              :placeholder="editing?.hasWebdavPassword ? '••••••••' : ''"
-              type="password"
-              autocomplete="off"
-            />
-          </template>
+    <CrudDialog v-model="dialog" :title="editing ? t('teams.edit') : t('teams.add')" @save="save">
+      <v-text-field v-model="form.name" :label="t('teams.name')" :rules="[required]" autofocus />
+      <v-select v-model="form.backend" :items="backendItems" :label="t('teams.backend')" />
+      <template v-if="!showWebdav">
+        <v-text-field
+          v-model="form.gistToken"
+          :label="t('teams.gistToken')"
+          :placeholder="editing?.hasGistToken ? '••••••••' : ''"
+          type="password"
+          autocomplete="off"
+        />
+        <v-text-field v-model="form.gistId" :label="t('teams.gistId')" />
+      </template>
+      <template v-else>
+        <v-text-field
+          v-model="form.webdavUrl"
+          :label="t('teams.webdavUrl')"
+          placeholder="https://dav.example.com/team/"
+        />
+        <v-text-field
+          v-model="form.webdavUsername"
+          :label="t('teams.webdavUsername')"
+          autocomplete="off"
+        />
+        <v-text-field
+          v-model="form.webdavPassword"
+          :label="t('teams.webdavPassword')"
+          :placeholder="editing?.hasWebdavPassword ? '••••••••' : ''"
+          type="password"
+          autocomplete="off"
+        />
+      </template>
     </CrudDialog>
   </div>
 </template>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useTunnelsStore } from '@/stores/tunnels'
-import TunnelDialog from '@/components/TunnelDialog.vue'
 import type { Tunnel } from '@shared/types'
+import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+import TunnelDialog from '@/components/TunnelDialog.vue'
+import { useTunnelsStore } from '@/stores/tunnels'
+import { useVaultStore } from '@/stores/vault'
 
 const { t } = useI18n()
 const vault = useVaultStore()
@@ -69,7 +69,11 @@ function route(tunnel: Tunnel): string {
       </v-btn>
     </div>
 
-    <v-card v-if="vault.tunnels.length === 0" variant="tonal" class="pa-8 text-center text-medium-emphasis">
+    <v-card
+      v-if="vault.tunnels.length === 0"
+      variant="tonal"
+      class="pa-8 text-center text-medium-emphasis"
+    >
       {{ t('tunnels.empty') }}
     </v-card>
 

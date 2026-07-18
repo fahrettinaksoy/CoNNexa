@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref, watch } from 'vue'
-import { Terminal } from '@xterm/xterm'
+import { useDebounceFn, useResizeObserver } from '@vueuse/core'
 import { FitAddon } from '@xterm/addon-fit'
 import { WebglAddon } from '@xterm/addon-webgl'
-import { useResizeObserver, useDebounceFn } from '@vueuse/core'
-import { useSessionsStore } from '@/stores/sessions'
-import { useRecordingsStore } from '@/stores/recordings'
-import { useSettingsStore } from '@/stores/settings'
+import { Terminal } from '@xterm/xterm'
+import { onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { getTerminalTheme } from '@/composables/terminalThemes'
+import { useRecordingsStore } from '@/stores/recordings'
+import { useSessionsStore } from '@/stores/sessions'
+import { useSettingsStore } from '@/stores/settings'
 
 const props = defineProps<{ sessionId: string }>()
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { onMounted, onBeforeUnmount, ref } from 'vue'
-import { useI18n } from 'vue-i18n'
 import type { SessionDescriptor } from '@shared/types'
+import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 const props = defineProps<{ session: SessionDescriptor }>()
 
@@ -10,7 +10,6 @@ const canvas = ref<HTMLCanvasElement | null>(null)
 const status = ref<'connecting' | 'connected' | 'error'>('connecting')
 const errorMsg = ref('')
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let session: any = null
 
 onMounted(async () => {
@@ -59,7 +58,10 @@ onBeforeUnmount(() => {
 <template>
   <div class="fill-height position-relative d-flex align-center justify-center rdp-host">
     <canvas ref="canvas" class="rdp-canvas" />
-    <div v-if="status !== 'connected'" class="d-flex flex-column align-center justify-center overlay">
+    <div
+      v-if="status !== 'connected'"
+      class="d-flex flex-column align-center justify-center overlay"
+    >
       <template v-if="status === 'connecting'">
         <v-progress-circular indeterminate color="primary" />
         <div class="mt-3 text-body-2">{{ t('sessions.connecting') }}</div>

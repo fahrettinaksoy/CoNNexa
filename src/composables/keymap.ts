@@ -69,30 +69,138 @@ export interface ShortcutDef {
 
 export const SHORTCUTS: readonly ShortcutDef[] = [
   // Genel
-  { id: 'palette', keys: action('k'), category: 'general', i18nKey: 'hotkeys.actions.palette', scope: 'global' },
-  { id: 'help', keys: primary('/'), category: 'general', i18nKey: 'hotkeys.actions.help', scope: 'global' },
-  { id: 'settings', keys: primary(','), category: 'general', i18nKey: 'hotkeys.actions.settings', scope: 'global' },
+  {
+    id: 'palette',
+    keys: action('k'),
+    category: 'general',
+    i18nKey: 'hotkeys.actions.palette',
+    scope: 'global'
+  },
+  {
+    id: 'help',
+    keys: primary('/'),
+    category: 'general',
+    i18nKey: 'hotkeys.actions.help',
+    scope: 'global'
+  },
+  {
+    id: 'settings',
+    keys: primary(','),
+    category: 'general',
+    i18nKey: 'hotkeys.actions.settings',
+    scope: 'global'
+  },
 
   // Gezinme
-  { id: 'goWorkspace', keys: primary('1'), category: 'navigation', i18nKey: 'hotkeys.actions.goWorkspace', scope: 'global' },
-  { id: 'goTunnels', keys: primary('2'), category: 'navigation', i18nKey: 'hotkeys.actions.goTunnels', scope: 'global' },
-  { id: 'goSync', keys: primary('3'), category: 'navigation', i18nKey: 'hotkeys.actions.goSync', scope: 'global' },
-  { id: 'goTeams', keys: primary('4'), category: 'navigation', i18nKey: 'hotkeys.actions.goTeams', scope: 'global' },
+  {
+    id: 'goWorkspace',
+    keys: primary('1'),
+    category: 'navigation',
+    i18nKey: 'hotkeys.actions.goWorkspace',
+    scope: 'global'
+  },
+  {
+    id: 'goTunnels',
+    keys: primary('2'),
+    category: 'navigation',
+    i18nKey: 'hotkeys.actions.goTunnels',
+    scope: 'global'
+  },
+  {
+    id: 'goSync',
+    keys: primary('3'),
+    category: 'navigation',
+    i18nKey: 'hotkeys.actions.goSync',
+    scope: 'global'
+  },
+  {
+    id: 'goTeams',
+    keys: primary('4'),
+    category: 'navigation',
+    i18nKey: 'hotkeys.actions.goTeams',
+    scope: 'global'
+  },
 
   // Oturum
-  { id: 'newTerminal', keys: action('t'), category: 'session', i18nKey: 'hotkeys.actions.newTerminal', scope: 'workspace' },
-  { id: 'closeSession', keys: action('w'), category: 'session', i18nKey: 'hotkeys.actions.closeSession', scope: 'workspace' },
-  { id: 'splitVertical', keys: action('d'), category: 'session', i18nKey: 'hotkeys.actions.splitVertical', scope: 'workspace' },
-  { id: 'splitHorizontal', keys: actionAlt('d'), category: 'session', i18nKey: 'hotkeys.actions.splitHorizontal', scope: 'workspace' },
-  { id: 'nextTab', keys: 'ctrl+tab', category: 'session', i18nKey: 'hotkeys.actions.nextTab', scope: 'workspace' },
-  { id: 'prevTab', keys: 'ctrl+shift+tab', category: 'session', i18nKey: 'hotkeys.actions.prevTab', scope: 'workspace' },
+  {
+    id: 'newTerminal',
+    keys: action('t'),
+    category: 'session',
+    i18nKey: 'hotkeys.actions.newTerminal',
+    scope: 'workspace'
+  },
+  {
+    id: 'closeSession',
+    keys: action('w'),
+    category: 'session',
+    i18nKey: 'hotkeys.actions.closeSession',
+    scope: 'workspace'
+  },
+  {
+    id: 'splitVertical',
+    keys: action('d'),
+    category: 'session',
+    i18nKey: 'hotkeys.actions.splitVertical',
+    scope: 'workspace'
+  },
+  {
+    id: 'splitHorizontal',
+    keys: actionAlt('d'),
+    category: 'session',
+    i18nKey: 'hotkeys.actions.splitHorizontal',
+    scope: 'workspace'
+  },
+  {
+    id: 'nextTab',
+    keys: 'ctrl+tab',
+    category: 'session',
+    i18nKey: 'hotkeys.actions.nextTab',
+    scope: 'workspace'
+  },
+  {
+    id: 'prevTab',
+    keys: 'ctrl+shift+tab',
+    category: 'session',
+    i18nKey: 'hotkeys.actions.prevTab',
+    scope: 'workspace'
+  },
 
   // Paneller
-  { id: 'toggleSftp', keys: actionAlt('f'), category: 'panels', i18nKey: 'hotkeys.actions.toggleSftp', scope: 'workspace' },
-  { id: 'toggleMonitor', keys: actionAlt('m'), category: 'panels', i18nKey: 'hotkeys.actions.toggleMonitor', scope: 'workspace' },
-  { id: 'toggleBroadcast', keys: actionAlt('b'), category: 'panels', i18nKey: 'hotkeys.actions.toggleBroadcast', scope: 'workspace' },
-  { id: 'toggleRecording', keys: actionAlt('r'), category: 'panels', i18nKey: 'hotkeys.actions.toggleRecording', scope: 'workspace' },
-  { id: 'aiAssistant', keys: action('i'), category: 'panels', i18nKey: 'hotkeys.actions.aiAssistant', scope: 'workspace' }
+  {
+    id: 'toggleSftp',
+    keys: actionAlt('f'),
+    category: 'panels',
+    i18nKey: 'hotkeys.actions.toggleSftp',
+    scope: 'workspace'
+  },
+  {
+    id: 'toggleMonitor',
+    keys: actionAlt('m'),
+    category: 'panels',
+    i18nKey: 'hotkeys.actions.toggleMonitor',
+    scope: 'workspace'
+  },
+  {
+    id: 'toggleBroadcast',
+    keys: actionAlt('b'),
+    category: 'panels',
+    i18nKey: 'hotkeys.actions.toggleBroadcast',
+    scope: 'workspace'
+  },
+  {
+    id: 'toggleRecording',
+    keys: actionAlt('r'),
+    category: 'panels',
+    i18nKey: 'hotkeys.actions.toggleRecording',
+    scope: 'workspace'
+  },
+  {
+    id: 'aiAssistant',
+    keys: action('i'),
+    category: 'panels',
+    i18nKey: 'hotkeys.actions.aiAssistant',
+    scope: 'workspace'
+  }
 ]
 
 /** Belirli bir kimliğin tuş dizesini döndürür (ör. buton ipuçları için). */

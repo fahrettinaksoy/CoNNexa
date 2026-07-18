@@ -40,6 +40,7 @@ impl SftpService {
         Ok(arc)
     }
 
+    #[allow(dead_code)] // oturum kapanışında önbellek geçersizleştirme için genel API
     pub async fn forget(&self, id: &str) {
         self.cache.lock().await.remove(id);
     }
@@ -80,7 +81,8 @@ impl SftpService {
         entries.sort_by(|a, b| {
             let ad = matches!(a.entry_type, SftpEntryType::Dir);
             let bd = matches!(b.entry_type, SftpEntryType::Dir);
-            bd.cmp(&ad).then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
+            bd.cmp(&ad)
+                .then_with(|| a.name.to_lowercase().cmp(&b.name.to_lowercase()))
         });
         Ok(entries)
     }

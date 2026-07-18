@@ -8,7 +8,7 @@ declare module '*.vue' {
 
 // noVNC tip tanımı içermez
 declare module '@novnc/novnc' {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line ts/no-explicit-any
   const RFB: any
   export default RFB
 }

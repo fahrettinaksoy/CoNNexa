@@ -1,17 +1,22 @@
-import { computed, type ComputedRef } from 'vue'
-import { useSettingsStore } from '@/stores/settings'
+import type { ComputedRef } from 'vue'
+import { computed } from 'vue'
 import { TERMINAL_THEMES } from '@/composables/terminalThemes'
+import { useSettingsStore } from '@/stores/settings'
 
 /** Bir hex rengin algısal olarak koyu olup olmadığı (ITU-R BT.601 luminans). */
 function isDarkHex(hex: string | undefined): boolean {
   if (!hex) return true
   let h = hex.replace('#', '')
   // Kısa (#fff) biçimi tam biçime genişlet, aksi halde koyu varsayılana düşerdi.
-  if (h.length === 3) h = h.split('').map((c) => c + c).join('')
+  if (h.length === 3)
+    h = h
+      .split('')
+      .map((c) => c + c)
+      .join('')
   if (h.length < 6) return true
-  const r = parseInt(h.slice(0, 2), 16)
-  const g = parseInt(h.slice(2, 4), 16)
-  const b = parseInt(h.slice(4, 6), 16)
+  const r = Number.parseInt(h.slice(0, 2), 16)
+  const g = Number.parseInt(h.slice(2, 4), 16)
+  const b = Number.parseInt(h.slice(4, 6), 16)
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return luminance < 0.5
 }

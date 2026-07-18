@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useRules } from '@/composables/rules'
-import CrudDialog from '@/components/CrudDialog.vue'
 import type { IdentityPublic, IdentitySaveRequest, SecretManager } from '@shared/types'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import CrudDialog from '@/components/CrudDialog.vue'
+import { useRules } from '@/composables/rules'
+import { useVaultStore } from '@/stores/vault'
 
-const model = defineModel<boolean>({ default: false })
 const props = defineProps<{ identity?: IdentityPublic | null }>()
-
+const model = defineModel<boolean>({ default: false })
 const { t } = useI18n()
 const vault = useVaultStore()
 const { required } = useRules()
@@ -23,20 +22,19 @@ function emptyForm(): IdentitySaveRequest {
 }
 
 watch(model, (openNow) => {
-    if (!openNow) return
-    form.value = props.identity
-      ? {
-          id: props.identity.id,
-          name: props.identity.name,
-          username: props.identity.username,
-          authType: props.identity.authType,
-          privateKeyPath: props.identity.privateKeyPath
-        }
-      : emptyForm()
-    passwordSource.value = props.identity?.secretRef?.manager ?? 'stored'
-    secretRefValue.value = props.identity?.secretRef?.ref ?? ''
-  }
-)
+  if (!openNow) return
+  form.value = props.identity
+    ? {
+        id: props.identity.id,
+        name: props.identity.name,
+        username: props.identity.username,
+        authType: props.identity.authType,
+        privateKeyPath: props.identity.privateKeyPath
+      }
+    : emptyForm()
+  passwordSource.value = props.identity?.secretRef?.manager ?? 'stored'
+  secretRefValue.value = props.identity?.secretRef?.ref ?? ''
+})
 
 const authItems = computed(() => [
   { title: t('identities.authTypes.password'), value: 'password' },
@@ -84,56 +82,39 @@ async function save(): Promise<void> {
     :max-width="480"
     @save="save"
   >
-    <v-text-field
-      v-model="form.name"
-      :label="t('identities.name')"
-      :rules="[required]"
-      autofocus
-    />
-        <v-text-field
-          v-model="form.username"
-          :label="t('identities.username')"
-          :rules="[required]"
-        />
-        <v-select
-          v-model="form.authType"
-          :items="authItems"
-          :label="t('identities.authType')"
-        />
-        <template v-if="form.authType === 'password'">
-          <v-select
-            v-model="passwordSource"
-            :items="passwordSourceItems"
-            :label="t('identities.passwordSource')"
-          />
-          <v-text-field
-            v-if="passwordSource === 'stored'"
-            v-model="form.password"
-            :label="identity?.hasPassword ? t('identities.passwordKeep') : t('identities.password')"
-            type="password"
-          />
-          <v-text-field
-            v-else
-            v-model="secretRefValue"
-            :label="t('identities.secretRef')"
-            :placeholder="secretRefPlaceholder"
-          />
-        </template>
-        <template v-if="form.authType === 'key'">
-          <v-text-field
-            v-model="form.privateKeyPath"
-            :label="t('identities.privateKeyPath')"
-            placeholder="~/.ssh/id_ed25519"
-          />
-          <v-text-field
-            v-model="form.passphrase"
-            :label="t('identities.passphrase')"
-            type="password"
-          />
-        </template>
-        <div class="text-caption text-medium-emphasis mt-1">
-          <v-icon icon="mdi-shield-lock-outline" size="small" class="mr-1" />
-          {{ t('identities.secure') }}
-        </div>
+    <v-text-field v-model="form.name" :label="t('identities.name')" :rules="[required]" autofocus />
+    <v-text-field v-model="form.username" :label="t('identities.username')" :rules="[required]" />
+    <v-select v-model="form.authType" :items="authItems" :label="t('identities.authType')" />
+    <template v-if="form.authType === 'password'">
+      <v-select
+        v-model="passwordSource"
+        :items="passwordSourceItems"
+        :label="t('identities.passwordSource')"
+      />
+      <v-text-field
+        v-if="passwordSource === 'stored'"
+        v-model="form.password"
+        :label="identity?.hasPassword ? t('identities.passwordKeep') : t('identities.password')"
+        type="password"
+      />
+      <v-text-field
+        v-else
+        v-model="secretRefValue"
+        :label="t('identities.secretRef')"
+        :placeholder="secretRefPlaceholder"
+      />
+    </template>
+    <template v-if="form.authType === 'key'">
+      <v-text-field
+        v-model="form.privateKeyPath"
+        :label="t('identities.privateKeyPath')"
+        placeholder="~/.ssh/id_ed25519"
+      />
+      <v-text-field v-model="form.passphrase" :label="t('identities.passphrase')" type="password" />
+    </template>
+    <div class="text-caption text-medium-emphasis mt-1">
+      <v-icon icon="mdi-shield-lock-outline" size="small" class="mr-1" />
+      {{ t('identities.secure') }}
+    </div>
   </CrudDialog>
 </template>

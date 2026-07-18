@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 /**
  * Tünel çalışma durumu. Tünel tanımları vault store'da tutulur; burada yalnızca

@@ -1,0 +1,22 @@
+name: 💡 Özellik önerisi
+description: Yeni bir özellik veya iyileştirme öner
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Hangi sorunu çözüyor?
+      description: Öneri bir kullanıcı ihtiyacına bağlı olmalı.
+      placeholder: '... yapmak istiyorum ama şu an mümkün değil çünkü ...'
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Önerilen çözüm
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Değerlendirilen alternatifler

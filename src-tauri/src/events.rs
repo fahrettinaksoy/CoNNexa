@@ -50,7 +50,14 @@ pub fn emit_exit(app: &AppHandle, id: &str, message: Option<&str>) {
 }
 
 pub fn emit_tunnel_state(app: &AppHandle, tunnel_id: &str, running: bool, error: Option<&str>) {
-    let _ = app.emit("tunnel:state", TunnelState { tunnel_id, running, error });
+    let _ = app.emit(
+        "tunnel:state",
+        TunnelState {
+            tunnel_id,
+            running,
+            error,
+        },
+    );
 }
 
 pub fn emit_ai_delta(app: &AppHandle, request_id: &str, text: &str) {
@@ -58,9 +65,21 @@ pub fn emit_ai_delta(app: &AppHandle, request_id: &str, text: &str) {
 }
 
 pub fn emit_ai_done(app: &AppHandle, request_id: &str) {
-    let _ = app.emit("ai:done", AiSimple { request_id, message: None });
+    let _ = app.emit(
+        "ai:done",
+        AiSimple {
+            request_id,
+            message: None,
+        },
+    );
 }
 
 pub fn emit_ai_error(app: &AppHandle, request_id: &str, message: &str) {
-    let _ = app.emit("ai:error", AiSimple { request_id, message: Some(message) });
+    let _ = app.emit(
+        "ai:error",
+        AiSimple {
+            request_id,
+            message: Some(message),
+        },
+    );
 }

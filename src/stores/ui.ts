@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, reactive } from 'vue'
+import { reactive, ref } from 'vue'
 
 /**
  * İkincil yüzeylerin (side sheet) açık/kapalı durumunu tutan tek kaynak.

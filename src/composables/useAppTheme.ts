@@ -1,4 +1,5 @@
-import { computed, type ComputedRef, type WritableComputedRef } from 'vue'
+import type { ComputedRef, WritableComputedRef } from 'vue'
+import { computed } from 'vue'
 import { useTheme } from 'vuetify'
 import { useSettingsStore } from '@/stores/settings'
 

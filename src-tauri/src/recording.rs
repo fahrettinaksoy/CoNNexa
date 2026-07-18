@@ -16,7 +16,10 @@ impl RecordingWriter {
             std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
         }
         let mut file = std::fs::File::create(&path).map_err(|e| e.to_string())?;
-        let ts = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+        let ts = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
         let header = serde_json::json!({
             "version": 2,
             "width": cols,
@@ -25,7 +28,11 @@ impl RecordingWriter {
             "title": title,
         });
         writeln!(file, "{header}").map_err(|e| e.to_string())?;
-        Ok(Self { file, start: Instant::now(), path })
+        Ok(Self {
+            file,
+            start: Instant::now(),
+            path,
+        })
     }
 
     pub fn write_chunk(&mut self, data: &str) {
@@ -37,11 +44,20 @@ impl RecordingWriter {
 
 /// `{ISO-ilk19}-{sanitize(title)}.cast` — güvenli dosya adı.
 pub fn make_filename(title: &str) -> String {
-    let ts = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0);
+    let ts = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
     let safe: String = title
         .to_lowercase()
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .take(40)
         .collect();
     format!("{ts}-{safe}.cast")

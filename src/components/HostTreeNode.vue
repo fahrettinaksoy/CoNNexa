@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { computed, inject } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
 import { hostActionsKey } from '@/composables/hostActions'
+import { useVaultStore } from '@/stores/vault'
 import HostListItem from './HostListItem.vue'
 
 const props = defineProps<{ groupId?: string }>()

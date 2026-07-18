@@ -150,7 +150,8 @@ export default {
     webdavUrl: 'WebDAV URL',
     webdavUsername: 'Username',
     webdavPassword: 'Password',
-    zeroKnowledge: 'End-to-end encryption: scrypt + AES-256-GCM. The team passphrase stays on your device.',
+    zeroKnowledge:
+      'End-to-end encryption: scrypt + AES-256-GCM. The team passphrase stays on your device.',
     assign: 'Assign to team',
     unassign: 'Remove from team'
   },
@@ -178,7 +179,8 @@ export default {
     pushDone: 'Vault encrypted and pushed.',
     pullDone: 'Restored a backup with {hosts} hosts.',
     configSaved: 'Sync settings saved.',
-    zeroKnowledge: 'End-to-end encryption: scrypt + AES-256-GCM. The passphrase stays on your device.'
+    zeroKnowledge:
+      'End-to-end encryption: scrypt + AES-256-GCM. The passphrase stays on your device.'
   },
   palette: {
     open: 'Command palette (Cmd/Ctrl+K)',

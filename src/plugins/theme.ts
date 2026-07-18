@@ -50,7 +50,7 @@ const dark: ThemeDefinition = {
     'medium-emphasis-opacity': 0.68,
     // MD3 durum katmanları (hover/seçili) — primary üzerinden okunur.
     'hover-opacity': 0.06,
-    'focus-opacity': 0.10,
+    'focus-opacity': 0.1,
     'selected-opacity': 0.14,
     'activated-opacity': 0.14,
     // Yükseltilmiş yüzeylere hafif primary "tint" katarak MD3 rengini yakalar.
@@ -81,9 +81,9 @@ const light: ThemeDefinition = {
     'high-emphasis-opacity': 0.88,
     'medium-emphasis-opacity': 0.62,
     'hover-opacity': 0.05,
-    'focus-opacity': 0.10,
-    'selected-opacity': 0.10,
-    'activated-opacity': 0.10,
+    'focus-opacity': 0.1,
+    'selected-opacity': 0.1,
+    'activated-opacity': 0.1,
     'theme-surface-tint': '#2962FF'
   }
 }

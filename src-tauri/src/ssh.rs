@@ -28,7 +28,10 @@ impl client::Handler for Client {
 
 pub enum AuthMethod {
     Password(String),
-    Key { pem: String, passphrase: Option<String> },
+    Key {
+        pem: String,
+        passphrase: Option<String>,
+    },
     Agent,
 }
 
@@ -84,9 +87,7 @@ async fn authenticate_agent(handle: &mut Handle<Client>, username: &str) -> Resu
         .await
         .map_err(|e| format!("agent kimlikleri alınamadı: {e}"))?;
     for key in identities {
-        let (agent_back, result) = handle
-            .authenticate_future(username, key, agent)
-            .await;
+        let (agent_back, result) = handle.authenticate_future(username, key, agent).await;
         agent = agent_back;
         if let Ok(true) = result {
             return Ok(true);
@@ -124,7 +125,10 @@ pub async fn open_shell(
 }
 
 /// Ayrı bir exec kanalında komut çalıştırır (shell'i kirletmez).
-pub async fn exec(handle: &SshHandle, command: &str) -> Result<(Option<i32>, String, String), String> {
+pub async fn exec(
+    handle: &SshHandle,
+    command: &str,
+) -> Result<(Option<i32>, String, String), String> {
     let mut channel = handle
         .channel_open_session()
         .await
@@ -161,7 +165,5 @@ pub async fn exec(handle: &SshHandle, command: &str) -> Result<(Option<i32>, Str
 
 /// Bağlantıyı kapatır.
 pub async fn disconnect(handle: &SshHandle) {
-    let _ = handle
-        .disconnect(Disconnect::ByApplication, "", "en")
-        .await;
+    let _ = handle.disconnect(Disconnect::ByApplication, "", "en").await;
 }

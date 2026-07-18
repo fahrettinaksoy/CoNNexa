@@ -1,0 +1,22 @@
+# EditorConfig — editörler arası tutarlı boşluk/kodlama.
+# https://editorconfig.org  ·  ESLint biçim kuralına (antfu) hizalı.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+# Rust: rustfmt varsayılanı 4 boşluk.
+[*.rs]
+indent_size = 4
+
+[Makefile]
+indent_style = tab
+
+# Markdown: satır sonu boşlukları bazen anlamlı (iki boşluk = <br>).
+[*.md]
+trim_trailing_whitespace = false

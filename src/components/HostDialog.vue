@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useRules } from '@/composables/rules'
-import CrudDialog from '@/components/CrudDialog.vue'
 import type { Host, Protocol } from '@shared/types'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import CrudDialog from '@/components/CrudDialog.vue'
+import { useRules } from '@/composables/rules'
+import { useVaultStore } from '@/stores/vault'
 
-const model = defineModel<boolean>({ default: false })
 const props = defineProps<{ host?: Host | null }>()
-
+const model = defineModel<boolean>({ default: false })
 const { t } = useI18n()
 const vault = useVaultStore()
 const { required, port, positiveInt } = useRules()
@@ -65,9 +64,7 @@ const identityItems = computed(() =>
   vault.identities.map((i) => ({ title: `${i.name} (${i.username})`, value: i.id }))
 )
 
-const groupItems = computed(() =>
-  vault.groups.map((g) => ({ title: g.name, value: g.id }))
-)
+const groupItems = computed(() => vault.groups.map((g) => ({ title: g.name, value: g.id })))
 
 async function save(): Promise<void> {
   await vault.saveHost(form.value)
@@ -76,61 +73,42 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <CrudDialog
-    v-model="model"
-    :title="host ? t('hosts.edit') : t('hosts.add')"
-    @save="save"
-  >
+  <CrudDialog v-model="model" :title="host ? t('hosts.edit') : t('hosts.add')" @save="save">
     <v-text-field v-model="form.name" :label="t('hosts.name')" :rules="[required]" autofocus />
-        <v-select
-          v-model="form.protocol"
-          :items="protocolItems"
-          :label="t('hosts.protocol')"
-        />
-        <v-row>
-          <v-col cols="8">
-            <v-text-field
-              v-model="form.hostname"
-              :label="isSerial ? t('hosts.devicePath') : t('hosts.hostname')"
-              :placeholder="isSerial ? '/dev/tty.usbserial' : ''"
-              :rules="[required]"
-            />
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model.number="form.port"
-              :label="isSerial ? t('hosts.baudRate') : t('hosts.port')"
-              type="number"
-              :rules="isSerial ? [positiveInt] : [port]"
-            />
-          </v-col>
-        </v-row>
-        <v-select
-          v-if="needsIdentity"
-          v-model="form.identityId"
-          :items="identityItems"
-          :label="t('hosts.identity')"
-          :hint="t('hosts.identityInheritHint')"
-          persistent-hint
-          clearable
-        />
-        <v-select
-          v-model="form.groupId"
-          :items="groupItems"
-          :label="t('hosts.group')"
-          clearable
-        />
+    <v-select v-model="form.protocol" :items="protocolItems" :label="t('hosts.protocol')" />
+    <v-row>
+      <v-col cols="8">
         <v-text-field
-          v-if="form.protocol === 'ssh'"
-          v-model="form.startupCommand"
-          :label="t('hosts.startupCommand')"
+          v-model="form.hostname"
+          :label="isSerial ? t('hosts.devicePath') : t('hosts.hostname')"
+          :placeholder="isSerial ? '/dev/tty.usbserial' : ''"
+          :rules="[required]"
         />
-        <v-combobox
-          v-model="form.tags"
-          :label="t('hosts.tags')"
-          multiple
-          chips
-          closable-chips
+      </v-col>
+      <v-col cols="4">
+        <v-text-field
+          v-model.number="form.port"
+          :label="isSerial ? t('hosts.baudRate') : t('hosts.port')"
+          type="number"
+          :rules="isSerial ? [positiveInt] : [port]"
         />
+      </v-col>
+    </v-row>
+    <v-select
+      v-if="needsIdentity"
+      v-model="form.identityId"
+      :items="identityItems"
+      :label="t('hosts.identity')"
+      :hint="t('hosts.identityInheritHint')"
+      persistent-hint
+      clearable
+    />
+    <v-select v-model="form.groupId" :items="groupItems" :label="t('hosts.group')" clearable />
+    <v-text-field
+      v-if="form.protocol === 'ssh'"
+      v-model="form.startupCommand"
+      :label="t('hosts.startupCommand')"
+    />
+    <v-combobox v-model="form.tags" :label="t('hosts.tags')" multiple chips closable-chips />
   </CrudDialog>
 </template>
