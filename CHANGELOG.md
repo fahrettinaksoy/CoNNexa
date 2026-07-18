@@ -32,10 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Security
 
+- **`russh` upgraded 0.45 → 0.61** (clears RUSTSEC-2026-0154/0153 SSH unbounded
+  allocation advisories). Ported the SSH/tunnel layers to the 0.61 API (native
+  `async fn` Handler trait, `AuthResult`, `PrivateKeyWithHashAlg`, new agent flow).
 - `quick-xml` bumped to `>=0.41` (fixes RUSTSEC-2026-0194/0195).
-- Documented `cargo audit` exceptions in `src-tauri/.cargo/audit.toml`:
-  `russh`/`russh-cryptovec` (RUSTSEC-2026-0154/0153, fixed in russh 0.60.3 — the
-  0.45→0.60 API migration is planned) and `rsa` (RUSTSEC-2023-0071, no upstream fix).
+- The only remaining documented `cargo audit` exception is `rsa`
+  (RUSTSEC-2023-0071, Marvin timing side-channel, no upstream fix — transitive via
+  russh's RSA key support); see `src-tauri/.cargo/audit.toml`.
 
 ### Known gaps
 
@@ -43,8 +46,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   client (mstsc/xfreerdp) works.
 - Mobile (Android/iOS) targets are not set up; some native crates are
   desktop-only.
-- `russh` 0.60 upgrade pending (see audit.toml) to clear the SSH allocation-DoS
-  advisories.
 
 ## [0.1.0] — 2026
 

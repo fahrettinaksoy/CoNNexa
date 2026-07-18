@@ -6,8 +6,10 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex as StdMutex};
 use std::time::Duration;
 
-use russh::client::{self, Handle};
-use russh::keys::key;
+use russh::client::{self, AuthResult, Handle};
+use russh::keys::agent::client::AgentClient;
+use russh::keys::agent::AgentIdentity;
+use russh::keys::{decode_secret_key, ssh_key, PrivateKeyWithHashAlg};
 use tauri::AppHandle;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::{TcpListener, TcpStream};
@@ -24,11 +26,10 @@ struct TunnelClient {
     forwarded: Option<mpsc::UnboundedSender<russh::Channel<client::Msg>>>,
 }
 
-#[async_trait::async_trait]
 impl client::Handler for TunnelClient {
     type Error = russh::Error;
 
-    async fn check_server_key(&mut self, _key: &key::PublicKey) -> Result<bool, Self::Error> {
+    async fn check_server_key(&mut self, _key: &ssh_key::PublicKey) -> Result<bool, Self::Error> {
         Ok(true)
     }
 
@@ -68,20 +69,27 @@ async fn connect(
         .map_err(|e| format!("tünel bağlanamadı: {e}"))?;
 
     let ok = match auth.method {
-        AuthMethod::Password(pw) => handle
-            .authenticate_password(auth.username, pw)
-            .await
-            .map_err(|e| e.to_string())?,
-        AuthMethod::Key { pem, passphrase } => {
-            let keypair = russh::keys::decode_secret_key(&pem, passphrase.as_deref())
-                .map_err(|e| format!("anahtar çözülemedi: {e}"))?;
-            handle
-                .authenticate_publickey(auth.username, Arc::new(keypair))
+        AuthMethod::Password(pw) => {
+            let res = handle
+                .authenticate_password(auth.username, pw)
                 .await
-                .map_err(|e| e.to_string())?
+                .map_err(|e| e.to_string())?;
+            matches!(res, AuthResult::Success)
+        }
+        AuthMethod::Key { pem, passphrase } => {
+            let key = decode_secret_key(&pem, passphrase.as_deref())
+                .map_err(|e| format!("anahtar çözülemedi: {e}"))?;
+            let res = handle
+                .authenticate_publickey(
+                    auth.username,
+                    PrivateKeyWithHashAlg::new(Arc::new(key), None),
+                )
+                .await
+                .map_err(|e| e.to_string())?;
+            matches!(res, AuthResult::Success)
         }
         AuthMethod::Agent => {
-            let mut agent = russh::keys::agent::client::AgentClient::connect_env()
+            let mut agent = AgentClient::connect_env()
                 .await
                 .map_err(|e| format!("agent bağlanamadı: {e}"))?;
             let ids = agent
@@ -89,10 +97,15 @@ async fn connect(
                 .await
                 .map_err(|e| e.to_string())?;
             let mut ok = false;
-            for key in ids {
-                let (back, res) = handle.authenticate_future(&auth.username, key, agent).await;
-                agent = back;
-                if let Ok(true) = res {
+            for id in ids {
+                let AgentIdentity::PublicKey { key, .. } = id else {
+                    continue;
+                };
+                let res = handle
+                    .authenticate_publickey_with(auth.username.clone(), key, None, &mut agent)
+                    .await
+                    .map_err(|e| e.to_string())?;
+                if matches!(res, AuthResult::Success) {
                     ok = true;
                     break;
                 }
@@ -171,7 +184,7 @@ impl TunnelManager {
             }
             TunnelType::Remote => {
                 let (tx, mut rx) = mpsc::unbounded_channel();
-                let mut handle = connect(&addr, ssh_port, auth, Some(tx)).await?;
+                let handle = connect(&addr, ssh_port, auth, Some(tx)).await?;
                 handle
                     .tcpip_forward(listen_host.clone(), tunnel.listen_port as u32)
                     .await

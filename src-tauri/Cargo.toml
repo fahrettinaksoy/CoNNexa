@@ -27,7 +27,6 @@ serde_json = "1"
 # Async runtime — tüm ağ/PTY/proxy işleri buradan.
 tokio = { version = "1", features = ["full"] }
 futures-util = "0.3"
-async-trait = "0.1"
 bytes = "1"
 
 # SSH: oturum shell'i, exec, SFTP, tünel port yönlendirme.

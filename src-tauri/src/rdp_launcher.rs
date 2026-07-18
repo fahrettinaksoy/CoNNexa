@@ -4,6 +4,9 @@
 use crate::types::Host;
 
 pub fn launch(host: &Host, username: &str, password: &str) -> Result<(), String> {
+    // addr yalnız windows/macos kollarında kullanılır; linux xfreerdp'de host+port
+    // ayrı geçer. Platforma göre kullanılmadığında uyarı vermesin.
+    #[allow(unused_variables)]
     let addr = format!(
         "{}:{}",
         host.hostname,

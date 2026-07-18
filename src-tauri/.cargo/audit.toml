@@ -5,22 +5,13 @@
 # gerekçe yaz — aksi halde bu dosya sessiz bir "hepsini görmezden gel"e döner.
 [advisories]
 ignore = [
-  # RUSTSEC-2026-0154 — `russh` 0.45, "Unbounded 32-bit allocation" (high 7.5).
-  # RUSTSEC-2026-0153 — `russh-cryptovec`, aynı sınıf tahsis sorunu (high 7.5).
-  # DURUM: Düzeltme `russh >= 0.60.3`'te. Şu an 0.45'teyiz; 0.45 → 0.60 API'de
-  # KIRICI bir sıçramadır (Handler trait'i, auth imzaları, keys modülü değişti)
-  # ve `russh-sftp` uyumluluğu ayrıca doğrulanmalı. Bu yüzden yükseltme ayrı bir
-  # iş olarak PLANLANDI. Bu arada risk: KÖTÜ NİYETLİ bir SSH SUNUCUSU'na
-  # bağlanınca bellek tüketimiyle DoS. Kullanıcı yalnız kendi güvendiği sunuculara
-  # bağlandığından maruziyet düşük; yine de yükseltme öncelikli görev.
-  "RUSTSEC-2026-0154",
-  "RUSTSEC-2026-0153",
-
   # RUSTSEC-2023-0071 — `rsa` 0.9.x, Marvin timing side-channel (medium 5.9).
   # `russh` üzerinden TRANSİTİF gelir (RSA anahtarlı SSH kimlik doğrulaması).
   # Upstream'de düzeltilmiş sürüm YOK. Saldırı, aynı özel anahtarla çok sayıda
   # işlemi hassas zamanlama ölçümüyle gözlemlemeyi gerektirir — masaüstü SSH
-  # istemcisi bağlamında pratik değeri düşük. `russh` bunu çözen bir sürüme
-  # geçince (ya da ed25519 anahtarlar zorunlu olunca) kaldırılacak.
+  # istemcisi bağlamında pratik değeri düşük. Ed25519 anahtarlar zorunlu olunca
+  # (ya da rsa bunu çözen bir sürüme geçince) kaldırılacak.
   "RUSTSEC-2023-0071",
+  # NOT: russh 0.45 → 0.61 yükseltmesi RUSTSEC-2026-0154/0153'ü (unbounded
+  # allocation) GERÇEKTEN düzeltti; o istisnalar kaldırıldı.
 ]
