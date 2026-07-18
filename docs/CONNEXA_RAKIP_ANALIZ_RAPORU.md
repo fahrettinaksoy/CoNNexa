@@ -1,7 +1,7 @@
 # Connexa — Rakip &amp; Pazar Analiz Raporu
 
 **Proje:** Connexa — RDP / SSH / VNC / Telnet Remote Access Manager
-**Hedef Stack:** Vue.js 3 · Electron · Vuetify 3 · Pinia · VueUse · Vue I18n · Vue Router
+**Hedef Stack:** Vue.js 3 · Tauri v2 (Rust) · Vuetify 3 · Pinia · VueUse · Vue I18n · Vue Router
 **Rapor Tarihi:** 3 Temmuz 2026
 **Kapsam:** 16 rakip/benzer ürün ve projenin derinlemesine analizi
 
@@ -14,7 +14,7 @@
 3. [Karşılaştırmalı Genel Tablo](#3-karşılaştırmalı-genel-tablo)
 4. [Özellik Matrisi](#4-özellik-matrisi)
 5. [Pazar Boşlukları ve Konumlandırma](#5-pazar-boşlukları-ve-konumlandırma)
-6. [Connexa için Mimari Öneriler (Vue + Electron)](#6-connexa-için-mimari-öneriler-vue--electron)
+6. [Connexa için Mimari Öneriler (Vue + Tauri)](#6-connexa-için-mimari-öneriler-vue--tauri)
 7. [Özellik Yol Haritası: MVP → v2](#7-özellik-yol-haritası-mvp--v2)
 8. [Teknik Riskler ve Azaltma Stratejileri](#8-teknik-riskler-ve-azaltma-stratejileri)
 9. [İş Modeli Dersleri](#9-iş-modeli-dersleri)
@@ -32,7 +32,7 @@
 - **electerm** (14.4k★) Connexa'ya en yakın mimari emsal — Electron'da SSH/SFTP/RDP/VNC/Telnet/Serial'ı kanıtlamış — ama UI'sı dağınık ve cilasız.
 - **Termix** (13.9k★) özellik seti en zengin proje ama **self-hosted web-first** — kurulum bariyeri yüksek, gerçek yerel-öncelikli masaüstü deneyimi değil.
 
-**Connexa'nın fırsat penceresi:** electerm'in kanıtladığı teknik temeli (node-pty + xterm.js + ssh2 + ironrdp-wasm + noVNC), Termius kalitesinde bir Vue/Vuetify UI ve local-first + opsiyonel zero-knowledge senkronizasyon modeliyle birleştirmek. Teknik açıdan en riskli alan **Electron içinde native kalitede RDP** — bunun için iki kanıtlanmış yol mevcut (bkz. Bölüm 8).
+**Connexa'nın fırsat penceresi:** electerm'in kanıtladığı teknik temeli (node-pty + xterm.js + ssh2 + ironrdp-wasm + noVNC), Termius kalitesinde bir Vue/Vuetify UI ve local-first + opsiyonel zero-knowledge senkronizasyon modeliyle birleştirmek. Teknik açıdan en riskli alan **uygulama içinde native kalitede RDP** — bunun için iki kanıtlanmış yol mevcut (bkz. Bölüm 8).
 
 ---
 
@@ -161,7 +161,7 @@
 - ✅ "Açık kaynak Termius alternatifi" konumlandırmasının viral çalıştığının kanıtı.
 - ✅ E2EE sync mimarisi (Argon2id + XChaCha20) referans şablon.
 - ✅ Termius import — benimseme hızlandırıcı, Connexa'da mutlaka olmalı.
-- ⚠️ Tauri'nin RAM/boyut avantajını Electron'a karşı pazarlama silahı yapıyorlar — Connexa'nın Electron seçiminde performans anlatısı baştan planlanmalı.
+- ⚠️ Tauri'nin RAM/boyut avantajını pazarlama silahı yapıyorlar — Connexa da Tauri v2 tabanlı olduğundan bu avantajı zaten paylaşır.
 - ⚠️ AGPL — kod kopyalamayın.
 
 ---
@@ -440,56 +440,57 @@
 
 - **Voltius'un viral büyümesi** (24 saatte 200+ yıldız) "açık kaynak Termius alternatifi" anlatısının çalıştığını kanıtlıyor; Connexa "açık kaynak mRemoteNG + Termius alternatifi" olarak daha geniş bir anlatıya sahip.
 - **SSH Deck'in görünmezliği** kapalı+sessiz modelin öldürücülüğünü gösteriyor: açık kaynak + GitHub + erken topluluk şart.
-- **Tauri karşılaştırması gelecek:** Voltius, RAM/boyut kıyasını pazarlama silahı yapıyor. Electron seçiminin savunusu hazır olmalı: olgun native modül ekosistemi (node-pty, ssh2, serialport), tek dil (JS/TS), kanıtlanmış emsaller (Termius, electerm, VS Code). Bellek disiplini baştan tasarım hedefi olmalı.
+- **Tauri avantajı:** Voltius, RAM/boyut kıyasını pazarlama silahı yapıyor. Connexa Tauri v2 (Rust arka uç + sistem WebView) tabanlı olduğundan bu düşük bellek/boyut avantajını doğal olarak paylaşır; karşılığında Rust ekosistemi (russh, portable-pty, serialport) ve derleme süresi disiplini gerekir.
 
 ---
 
-## 6. Connexa için Mimari Öneriler (Vue + Electron)
+## 6. Connexa için Mimari Öneriler (Vue + Tauri)
 
 ### 6.1 Genel Mimari
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│ Renderer Process (sandbox, contextIsolation: true)          │
+│ WebView (sistem WebView, Vue 3)                             │
 │  Vue 3 + Vuetify 3 + Pinia + Vue Router + Vue I18n + VueUse │
 │  ├─ xterm.js v6 (WebGL addon) → terminal görünümleri        │
 │  ├─ @novnc/novnc → VNC canvas                               │
 │  ├─ ironrdp-wasm → RDP canvas (istemci taraflı, WASM)       │
-│  └─ preload.ts → contextBridge ile tipli, dar IPC API       │
+│  └─ bridge/connexa.ts → window.connexa (Tauri invoke/listen)│
 ├────────────────────────────────────────────────────────────┤
-│ Main Process (Node.js)                                      │
-│  ├─ SessionManager: oturum yaşam döngüsü                    │
-│  │   ├─ node-pty        → yerel terminal                    │
-│  │   ├─ ssh2            → SSH/SFTP/tünel/jump host          │
-│  │   └─ telnet socket   → Telnet                            │
-│  ├─ VaultService: better-sqlite3 (SQLCipher/şifreli alan)   │
-│  │   └─ safeStorage / keytar → OS keychain (master anahtar) │
-│  ├─ SyncService: Gist / WebDAV / dosya (v1.x)               │
+│ Rust Arka Uç (Tauri v2)                                     │
+│  ├─ SessionManager: oturum yaşam döngüsü (tokio task/thread)│
+│  │   ├─ portable-pty    → yerel terminal                    │
+│  │   ├─ russh           → SSH/SFTP/tünel/exec               │
+│  │   ├─ tokio TCP       → Telnet                            │
+│  │   └─ serialport      → Serial                            │
+│  ├─ VaultStore: vault.json (alan bazında şifreli)           │
+│  │   └─ keyring → OS anahtarlığı (master anahtar) + AES-GCM │
+│  ├─ SyncService: Gist / WebDAV (reqwest)                    │
 │  └─ ImportService: ~/.ssh/config, mRemoteNG XML, Termius    │
 └────────────────────────────────────────────────────────────┘
 ```
 
 **Temel prensipler:**
 
-1. **Süreç ayrımı disiplini:** Tüm ağ/PTY/kripto işleri main process'te (veya utility process'lerde); renderer yalnızca görüntüleme. `contextIsolation: true`, `nodeIntegration: false`, preload'da dar ve tipli IPC yüzeyi.
-2. **Oturum başına utility process (öneri):** Electron'un `utilityProcess` API'siyle her SSH/RDP oturumunu ayrı sürece almak, tek oturum çökmesinin uygulamayı düşürmesini engeller ve bellek ölçümünü kolaylaştırır (Tauri kıyasına karşı savunma).
+1. **Katman ayrımı disiplini:** Tüm ağ/PTY/kripto işleri Rust arka uçta; WebView yalnızca görüntüleme. Tauri yetenekleri (capabilities) + CSP ile dar yüzey; `window.connexa` köprüsünde tipli invoke/listen API.
+2. **Oturum başına izole task:** Her SSH/telnet/serial oturumu ayrı bir Rust async task/thread'inde çalışır; tek oturumun hatası uygulamayı düşürmez ve Rust arka uç bellek ayak izini düşük tutar.
 3. **Veri modeli — Termius taksonomisi + mRemoteNG kalıtımı:**
    - `Host` (adres, protokol, ayarlar) · `Group` (iç içe, **ayar kalıtımı**) · `Identity` (kullanıcı/anahtar/parola — hostlardan ayrık, "name ile referans" Royal TS deseni) · `Snippet` · `Tunnel` · `Tag`.
-4. **TypeScript zorunlu** (electerm'in JS codebase'i sürdürülebilirlik açısından ders) + Vite + electron-builder; pinia store'ları oturum durumu (UI) ile kalıcı veri (vault) arasında net ayrım yapmalı.
+4. **TypeScript zorunlu** (electerm'in JS codebase'i sürdürülebilirlik açısından ders) + Vite + Tauri (`tauri build`); pinia store'ları oturum durumu (UI) ile kalıcı veri (vault) arasında net ayrım yapmalı.
 
 ### 6.2 Protokol Motoru Seçimleri (kanıtlanmış "alışveriş listesi")
 
 | İhtiyaç | Kütüphane | Kanıt |
 |---|---|---|
-| Yerel terminal PTY | `node-pty` | electerm, VS Code |
+| Yerel terminal PTY | `portable-pty` (Rust) | electerm/VS Code (node-pty ile aynı yaklaşım) |
 | Terminal render | `@xterm/xterm` v6 + `addon-webgl`, `addon-fit`, `addon-search` | electerm, Termix, Termius, WebSSH |
-| SSH / SFTP / tünel | `ssh2` (veya `@electerm/ssh2` fork'u) | electerm, Termix |
-| Telnet | saf TCP socket + xterm.js (basit protokol) | electerm |
+| SSH / SFTP / tünel | `russh` + `russh-sftp` (Rust) | electerm, Termix (ssh2 ile aynı yaklaşım) |
+| Telnet | saf TCP socket (tokio) + xterm.js | electerm |
 | **RDP — Yol A (istemci taraflı)** | `ironrdp-wasm` (Devolutions IronRDP WASM) | electerm |
 | **RDP — Yol B (yardımcı süreç)** | FreeRDP binary'sine delege / guacamole-lite proxy | 1Remote (runner), Termix |
-| VNC | `@novnc/novnc` (websockify köprüsü main'de) | electerm, Termix |
-| Serial (v2) | `serialport` | electerm, Termix |
-| Credential saklama | Electron `safeStorage` + OS keychain; vault dosyası için AES-256-GCM / XChaCha20-Poly1305, anahtar türetme Argon2id | Voltius, SSH Deck, sshPilot |
+| VNC | `@novnc/novnc` (WS↔TCP köprüsü Rust'ta) | electerm, Termix |
+| Serial | `serialport` (Rust crate) | electerm, Termix |
+| Credential saklama | OS anahtarlığı (`keyring`) + AES-256-GCM (at-rest); taşınabilir vault için scrypt + AES-256-GCM | Voltius, SSH Deck, sshPilot |
 
 **RDP önerisi:** MVP'de **Yol A (ironrdp-wasm)** ile başlayın — native bağımlılık yok, cross-platform, electerm'de kanıtlı. NLA/CredSSP, çoklu ekran, yüksek DPI gibi ileri senaryolar için v1.x'te **Yol B**'yi (FreeRDP'ye "runner" fallback, 1Remote deseni) ekleyin. Native MSTSC kalitesi hedef değil; "yeterince iyi + her platformda aynı" hedeftir.
 
@@ -503,8 +504,8 @@
 
 ### 6.4 Güvenlik Mimarisi (baştan tasarlanmalı — mRemoteNG CVE dersi)
 
-1. **Master anahtar** OS keychain'de (`safeStorage`); vault dosyası AES-256-GCM/XChaCha20 ile şifreli; anahtar türetmede Argon2id (Voltius emsali).
-2. Parolalar/anahtarlar **asla** renderer'a düz metin gitmez; IPC yalnızca oturum ID'leriyle çalışır ("connect(hostId)" — credential main'de çözülür).
+1. **Master anahtar** OS anahtarlığında (`keyring` crate); at-rest alanlar AES-256-GCM ile şifreli; taşınabilir vault (sync/team) scrypt + AES-256-GCM (Voltius emsali).
+2. Parolalar/anahtarlar **asla** arayüze düz metin gitmez; komut yüzeyi yalnızca oturum ID'leriyle çalışır ("connect(hostId)" — credential Rust arka uçta çözülür).
 3. Known hosts doğrulaması + host key değişim uyarısı (MITM koruması) MVP'de olmalı.
 4. Sync her zaman **zero-knowledge**: veri cihazdan şifreli çıkar ("trafiğinizi asla proxy'lemeyiz" garantisi — SSH Deck/Voltius anlatısı).
 5. Gizlilik modu (sshPilot deseni): ekran paylaşımında IP/hostname maskeleme — ucuz ama sevilen özellik.
@@ -519,7 +520,7 @@
 
 - ✅ SSH terminal (ssh2 + xterm.js/WebGL): parola, anahtar, agent, keyboard-interactive, jump host
 - ✅ SFTP: **SSH oturumu açılınca otomatik yan panel** (MobaXterm deseni), sürükle-bırak
-- ✅ Telnet + yerel terminal (node-pty)
+- ✅ Telnet + yerel terminal (portable-pty)
 - ✅ RDP (ironrdp-wasm — temel senaryo) &amp; VNC (noVNC)
 - ✅ Bağlantı yöneticisi: iç içe gruplar + **ayar kalıtımı**, etiket/renk/ikon, arama
 - ✅ Identity/Keychain modeli (kimlik–host ayrımı, name ile referans)
@@ -557,10 +558,10 @@
 
 | # | Risk | Etki | Olasılık | Azaltma |
 |---|---|---|---|---|
-| 1 | **Electron'da RDP kalitesi** — native MSTSC (1Remote/mRemoteNG) kalitesine ulaşılamaması; NLA/CredSSP, HiDPI, çoklu ekran sorunları | Yüksek | Yüksek | İki aşamalı strateji: MVP'de ironrdp-wasm (electerm kanıtı, "yeterince iyi"); v1.x'te FreeRDP runner fallback (1Remote deseni). Beklentiyi "temel RDP her platformda" olarak yönetin; guacamole-lite (sunucu proxy) v2 self-hosted senaryosuna saklanabilir. |
-| 2 | **node-pty / native modül derleme cehennemi** — Electron sürüm yükseltmelerinde ABI kırılmaları (node-pty, better-sqlite3, serialport) | Orta | Yüksek | `electron-rebuild` + prebuilt binary'ler; CI'da 3 platform matrisi; Electron sürümünü dondurup planlı yükseltme; Termix'in postinstall patch yaklaşımını inceleyin. |
-| 3 | **Credential güvenliği** — hatalı kripto tasarımı (mRemoteNG CVE geçmişi) | Kritik | Orta | Kendi kripto şemanızı icat etmeyin: safeStorage + Argon2id + AES-256-GCM/XChaCha20 (Voltius şablonu); renderer'a düz metin credential göndermeme kuralı; erken güvenlik incelemesi/audit. |
-| 4 | **Bellek/performans eleştirisi** — Tauri kampı kıyaslamaları (Voltius ~300 MB vs Termius ~500 MB anlatısı) | Orta | Yüksek | Oturum başına utility process + boşta oturumları uyutma; xterm.js WebGL; başlangıç hedefi belirleyin (ör. boşta &lt; 250 MB) ve pazarlamada şeffaf yayınlayın. |
+| 1 | **Uygulama içinde RDP kalitesi** — native MSTSC (1Remote/mRemoteNG) kalitesine ulaşılamaması; NLA/CredSSP, HiDPI, çoklu ekran sorunları | Yüksek | Yüksek | İki aşamalı strateji: MVP'de ironrdp-wasm (electerm kanıtı, "yeterince iyi"); v1.x'te FreeRDP runner fallback (1Remote deseni). Beklentiyi "temel RDP her platformda" olarak yönetin; guacamole-lite (sunucu proxy) v2 self-hosted senaryosuna saklanabilir. |
+| 2 | **Rust native crate derleme süresi** — russh/serialport/ironrdp gibi crate'lerin ilk derlemesi uzun (ABI kırılması yok, kaynaktan derlenir) | Orta | Orta | Sabit Rust araç zinciri (`rust-toolchain.toml`); CI'da 3 platform matrisi + cargo cache; gerekirse `sccache`; sürümleri `Cargo.lock` ile dondur. |
+| 3 | **Credential güvenliği** — hatalı kripto tasarımı (mRemoteNG CVE geçmişi) | Kritik | Orta | Kendi kripto şemanızı icat etmeyin: OS anahtarlığı (keyring) + scrypt/Argon2id + AES-256-GCM (Voltius şablonu); arayüze düz metin credential göndermeme kuralı; erken güvenlik incelemesi/audit. |
+| 4 | **Bellek/performans eleştirisi** — Tauri kampı kıyaslamaları (Voltius ~300 MB vs Termius ~500 MB anlatısı) | Orta | Yüksek | Oturum başına Rust async task + boşta oturumları uyutma; xterm.js WebGL. Tauri tabanı bu eleştiriyi büyük ölçüde nötrler; yine de başlangıç hedefi belirleyip (ör. boşta &lt; 250 MB) şeffaf yayınlayın. |
 | 5 | **Kapsam patlaması** — 8 protokol + izleme + sync'i aynı anda hedeflemek (Termix'in öğrenme eğrisi, RustConn'un bakım yükü) | Yüksek | Yüksek | Yol haritası disiplinine sadakat: MVP'de 4 protokol; her protokol için "gömülü + fallback" deseniyle bakım yükünü sınırlama. |
 | 6 | **Tek geliştirici bus factor'ü** — Muon öldü, electerm riskli | Yüksek | Orta | Açık kaynak + erken topluluk (Voltius kanıtı); CONTRIBUTING + iyi doküman; Crowdin ile çeviri topluluğu erken katılım kanalı. |
 | 7 | **GPL/AGPL bulaşması** — 1Remote, RustConn, Muon (GPL), Voltius (AGPL) kodlarından alıntı | Kritik | Düşük | Yalnızca MIT (electerm) ve Apache 2.0 (Termix) kaynaklardan kod incelemesi/alıntısı; GPL projelerden yalnızca fikir/UX deseni alın. Connexa lisansı: MIT veya Apache 2.0 önerilir. |
