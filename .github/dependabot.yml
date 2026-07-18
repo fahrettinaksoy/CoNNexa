@@ -1,0 +1,41 @@
+# Otomatik bağımlılık güncellemeleri — üç ekosistem de kapsanır.
+# Dependabot güncellemeleri haftalık PR olarak açar; CI kalite + audit kapıları
+# PR'ı ayrıca doğrular.
+version: 2
+updates:
+  # Frontend (package.json)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    # Major'lar kırıcı olabilir → otomatik PR AÇILMAZ; bilinçli, elle yükseltilir.
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # Rust arka uç (src-tauri/Cargo.toml)
+  - package-ecosystem: cargo
+    directory: /src-tauri
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  # GitHub Actions sürümleri (actions/checkout, setup-node, tauri-action…)
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

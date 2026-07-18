@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref, computed, nextTick, watch } from 'vue'
-import { useI18n } from 'vue-i18n'
 import { useEventListener } from '@vueuse/core'
-import { useVaultStore } from '@/stores/vault'
-import { useSessionsStore } from '@/stores/sessions'
-import { usePluginsStore } from '@/stores/plugins'
-import { useUiStore } from '@/stores/ui'
+import { computed, nextTick, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { protocolIcon } from '@/plugins/icons'
+import { usePluginsStore } from '@/stores/plugins'
+import { useSessionsStore } from '@/stores/sessions'
+import { useUiStore } from '@/stores/ui'
+import { useVaultStore } from '@/stores/vault'
 
 interface Command {
   id: string

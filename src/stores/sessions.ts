@@ -1,6 +1,6 @@
+import type { Protocol, SessionDescriptor } from '@shared/types'
 import { defineStore } from 'pinia'
-import { ref, computed, shallowReactive } from 'vue'
-import type { SessionDescriptor, Protocol } from '@shared/types'
+import { computed, ref, shallowReactive } from 'vue'
 
 export interface OpenSession extends SessionDescriptor {
   status: 'connected' | 'closed'
@@ -185,7 +185,7 @@ export const useSessionsStore = defineStore('sessions', () => {
    * Dönüş: hedef oturum sayısı (0 ise yazılabilir oturum yok).
    */
   function runCommand(command: string): number {
-    const line = command.endsWith('\n') ? command : command + '\n'
+    const line = command.endsWith('\n') ? command : `${command}\n`
     if (broadcast.value) {
       const ids = liveTerminalIds.value
       for (const id of ids) window.connexa.sessions.write(id, line)

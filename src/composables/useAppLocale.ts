@@ -1,4 +1,5 @@
-import { computed, type WritableComputedRef } from 'vue'
+import type { WritableComputedRef } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSettingsStore } from '@/stores/settings'
 

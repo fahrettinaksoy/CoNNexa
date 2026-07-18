@@ -43,8 +43,12 @@ pub fn list(config_dir: &Path) -> PluginResult {
                 continue;
             }
             let manifest_path = path.join("plugin.json");
-            let Ok(text) = std::fs::read_to_string(&manifest_path) else { continue };
-            let Ok(manifest) = serde_json::from_str::<Manifest>(&text) else { continue };
+            let Ok(text) = std::fs::read_to_string(&manifest_path) else {
+                continue;
+            };
+            let Ok(manifest) = serde_json::from_str::<Manifest>(&text) else {
+                continue;
+            };
             let dir_name = entry.file_name().to_string_lossy().to_string();
             let snips = manifest.snippets.unwrap_or_default();
             for (i, s) in snips.iter().enumerate() {
@@ -67,7 +71,12 @@ pub fn list(config_dir: &Path) -> PluginResult {
         }
     }
 
-    PluginResult { ok: true, error: None, plugins, snippets }
+    PluginResult {
+        ok: true,
+        error: None,
+        plugins,
+        snippets,
+    }
 }
 
 pub fn install(config_dir: &Path, source: &Path) -> PluginResult {
@@ -101,7 +110,12 @@ pub fn remove(config_dir: &Path, id: &str) -> PluginResult {
 }
 
 fn err(msg: impl Into<String>) -> PluginResult {
-    PluginResult { ok: false, error: Some(msg.into()), plugins: vec![], snippets: vec![] }
+    PluginResult {
+        ok: false,
+        error: Some(msg.into()),
+        plugins: vec![],
+        snippets: vec![],
+    }
 }
 
 fn copy_dir_recursive(src: &Path, dst: &Path) -> Result<(), String> {

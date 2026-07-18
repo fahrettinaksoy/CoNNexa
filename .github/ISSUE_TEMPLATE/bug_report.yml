@@ -1,0 +1,53 @@
+name: 🐛 Hata bildirimi
+description: Beklenmeyen bir davranış veya çökme bildir
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Teşekkürler! Bir **güvenlik açığı** için bunu KULLANMA — bkz. [SECURITY.md](../blob/main/SECURITY.md).
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Ne oldu?
+      description: Beklenen ve gerçekleşen davranışı yaz.
+      placeholder: '... yaptığımda ... olmasını bekledim ama ... oldu.'
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Yeniden üretme adımları
+      placeholder: |
+        1. ...
+        2. ...
+        3. Hata görünür
+    validations:
+      required: true
+  - type: dropdown
+    id: protocol
+    attributes:
+      label: İlgili protokol
+      options: [SSH, SFTP, Telnet, Serial, VNC, RDP, Yerel terminal, Diğer/İlgisiz]
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Loglar
+      description: 'Uygulama log dizinindeki (app log dir) ilgili satırları yapıştır.'
+      render: shell
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options: [macOS, Windows, Linux]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Uygulama sürümü
+      placeholder: '0.1.0'
+    validations:
+      required: true

@@ -1,7 +1,7 @@
 import { createI18n } from 'vue-i18n'
 import { en as vuetifyEn, tr as vuetifyTr } from 'vuetify/locale'
-import tr from './locales/tr'
 import en from './locales/en'
+import tr from './locales/tr'
 
 /**
  * vue-i18n örneği — uygulamanın metinlerinin yanı sıra Vuetify bileşenlerinin

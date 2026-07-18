@@ -1,10 +1,10 @@
-import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { createApp } from 'vue'
 import App from './App.vue'
-import router from './router'
+import { installConnexaBridge } from './bridge/connexa'
 import { i18n } from './i18n'
 import { vuetify } from './plugins/vuetify'
-import { installConnexaBridge } from './bridge/connexa'
+import router from './router'
 
 import '@xterm/xterm/css/xterm.css'
 import './assets/main.css'

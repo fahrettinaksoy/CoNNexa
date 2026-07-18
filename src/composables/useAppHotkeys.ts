@@ -1,6 +1,8 @@
-import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+import type { MaybeRefOrGetter } from 'vue'
+import type { ShortcutId, ShortcutScope } from './keymap'
+import { computed, toValue } from 'vue'
 import { useHotkey } from 'vuetify'
-import { SHORTCUTS, type ShortcutId, type ShortcutScope } from './keymap'
+import { SHORTCUTS } from './keymap'
 
 export type HotkeyHandlers = Partial<Record<ShortcutId, (e: KeyboardEvent) => void>>
 

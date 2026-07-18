@@ -1,10 +1,10 @@
 <script setup lang="ts">
+import type { OpenSession } from '@/stores/sessions'
 import { useI18n } from 'vue-i18n'
 import { useSessionsStore } from '@/stores/sessions'
+import RdpPane from './RdpPane.vue'
 import TerminalPane from './TerminalPane.vue'
 import VncPane from './VncPane.vue'
-import RdpPane from './RdpPane.vue'
-import type { OpenSession } from '@/stores/sessions'
 
 const props = defineProps<{
   session: OpenSession
@@ -22,11 +22,7 @@ function focus(): void {
 </script>
 
 <template>
-  <div
-    class="session-pane"
-    :class="{ 'pane-active': active && multi }"
-    @mousedown="focus"
-  >
+  <div class="session-pane" :class="{ 'pane-active': active && multi }" @mousedown="focus">
     <div class="pane-body">
       <VncPane v-if="session.protocol === 'vnc'" :session="session" />
       <RdpPane v-else-if="session.protocol === 'rdp'" :session="session" />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount } from 'vue'
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useSessionsStore } from '@/stores/sessions'
 
@@ -116,7 +116,13 @@ function insertCommand(): void {
         <v-btn variant="text" @click="emit('update:modelValue', false)">
           {{ t('common.cancel') }}
         </v-btn>
-        <v-btn color="primary" variant="flat" :loading="busy" :disabled="!prompt.trim()" @click="ask">
+        <v-btn
+          color="primary"
+          variant="flat"
+          :loading="busy"
+          :disabled="!prompt.trim()"
+          @click="ask"
+        >
           {{ t('ai.ask') }}
         </v-btn>
       </v-card-actions>

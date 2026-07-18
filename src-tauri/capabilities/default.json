@@ -3,10 +3,5 @@
   "identifier": "default",
   "description": "Ana pencere yetenekleri",
   "windows": ["main"],
-  "permissions": [
-    "core:default",
-    "opener:default",
-    "dialog:default",
-    "log:default"
-  ]
+  "permissions": ["core:default", "opener:default", "dialog:default", "log:default"]
 }

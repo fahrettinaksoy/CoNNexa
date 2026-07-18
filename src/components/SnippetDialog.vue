@@ -1,14 +1,13 @@
 <script setup lang="ts">
+import type { Snippet } from '@shared/types'
 import { ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useRules } from '@/composables/rules'
 import CrudDialog from '@/components/CrudDialog.vue'
-import type { Snippet } from '@shared/types'
+import { useRules } from '@/composables/rules'
+import { useVaultStore } from '@/stores/vault'
 
-const model = defineModel<boolean>({ default: false })
 const props = defineProps<{ snippet?: Snippet | null }>()
-
+const model = defineModel<boolean>({ default: false })
 const { t } = useI18n()
 const vault = useVaultStore()
 const { required } = useRules()
@@ -35,12 +34,7 @@ async function save(): Promise<void> {
     :title="snippet ? t('snippets.edit') : t('snippets.add')"
     @save="save"
   >
-    <v-text-field
-      v-model="form.name"
-      :label="t('snippets.name')"
-      :rules="[required]"
-      autofocus
-    />
+    <v-text-field v-model="form.name" :label="t('snippets.name')" :rules="[required]" autofocus />
     <v-textarea
       v-model="form.command"
       :label="t('snippets.command')"
@@ -49,13 +43,7 @@ async function save(): Promise<void> {
       rows="3"
       class="command-field"
     />
-    <v-combobox
-      v-model="form.tags"
-      :label="t('hosts.tags')"
-      multiple
-      chips
-      closable-chips
-    />
+    <v-combobox v-model="form.tags" :label="t('hosts.tags')" multiple chips closable-chips />
   </CrudDialog>
 </template>
 

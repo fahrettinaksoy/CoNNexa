@@ -18,7 +18,10 @@ pub fn tunnel_running(state: State<AppState>) -> Vec<String> {
 }
 
 #[tauri::command]
-pub async fn tunnel_start(state: State<'_, AppState>, tunnel_id: String) -> Result<SimpleResult, String> {
+pub async fn tunnel_start(
+    state: State<'_, AppState>,
+    tunnel_id: String,
+) -> Result<SimpleResult, String> {
     let (tunnel, host) = {
         let vault = state.vault.lock().unwrap();
         let tunnel = match vault.get_tunnel(&tunnel_id) {
@@ -35,7 +38,9 @@ pub async fn tunnel_start(state: State<'_, AppState>, tunnel_id: String) -> Resu
         Ok(v) => v,
         Err(e) => return Ok(SimpleResult::err(e)),
     };
-    Ok(SimpleResult::from(state.tunnels.start(tunnel, addr, port, auth).await))
+    Ok(SimpleResult::from(
+        state.tunnels.start(tunnel, addr, port, auth).await,
+    ))
 }
 
 #[tauri::command]
@@ -46,11 +51,18 @@ pub fn tunnel_stop(state: State<AppState>, tunnel_id: String) {
 // ---- Metrics ----
 
 #[tauri::command]
-pub async fn metrics_snapshot(state: State<'_, AppState>, session_id: String) -> Result<HostMetrics, String> {
+pub async fn metrics_snapshot(
+    state: State<'_, AppState>,
+    session_id: String,
+) -> Result<HostMetrics, String> {
     let handle = state.sessions.get_ssh(&session_id);
     Ok(match handle {
         Some(h) => metrics::snapshot(&h).await,
-        None => HostMetrics { ok: false, error: Some("SSH oturumu bulunamadı".into()), ..Default::default() },
+        None => HostMetrics {
+            ok: false,
+            error: Some("SSH oturumu bulunamadı".into()),
+            ..Default::default()
+        },
     })
 }
 
@@ -65,17 +77,34 @@ pub fn recording_start(
     rows: u16,
 ) -> RecordingStartResult {
     let config_dir = state.vault.lock().unwrap().config_dir.clone();
-    match state.sessions.start_recording(&session_id, &title, cols, rows, &config_dir) {
-        Ok(path) => RecordingStartResult { ok: true, error: None, file_path: Some(path.display().to_string()) },
-        Err(e) => RecordingStartResult { ok: false, error: Some(e), file_path: None },
+    match state
+        .sessions
+        .start_recording(&session_id, &title, cols, rows, &config_dir)
+    {
+        Ok(path) => RecordingStartResult {
+            ok: true,
+            error: None,
+            file_path: Some(path.display().to_string()),
+        },
+        Err(e) => RecordingStartResult {
+            ok: false,
+            error: Some(e),
+            file_path: None,
+        },
     }
 }
 
 #[tauri::command]
 pub fn recording_stop(state: State<AppState>, session_id: String) -> RecordingStopResult {
     match state.sessions.stop_recording(&session_id) {
-        Some(path) => RecordingStopResult { ok: true, file_path: Some(path.display().to_string()) },
-        None => RecordingStopResult { ok: false, file_path: None },
+        Some(path) => RecordingStopResult {
+            ok: true,
+            file_path: Some(path.display().to_string()),
+        },
+        None => RecordingStopResult {
+            ok: false,
+            file_path: None,
+        },
     }
 }
 
@@ -95,7 +124,10 @@ pub fn recording_open_folder(state: State<AppState>) {
 // ---- Harici RDP ----
 
 #[tauri::command]
-pub async fn rdp_launch_external(state: State<'_, AppState>, host_id: String) -> Result<SimpleResult, String> {
+pub async fn rdp_launch_external(
+    state: State<'_, AppState>,
+    host_id: String,
+) -> Result<SimpleResult, String> {
     let host = {
         let vault = state.vault.lock().unwrap();
         match vault.get_host(&host_id) {
@@ -106,12 +138,17 @@ pub async fn rdp_launch_external(state: State<'_, AppState>, host_id: String) ->
     // Kimlik sırları (kullanıcı adı + parola)
     let (username, password) = {
         let vault = state.vault.lock().unwrap();
-        match vault.resolve_identity_id(&host).and_then(|id| vault.resolve_secrets(&id).ok()) {
+        match vault
+            .resolve_identity_id(&host)
+            .and_then(|id| vault.resolve_secrets(&id).ok())
+        {
             Some(s) => (s.identity.username.clone(), s.password.unwrap_or_default()),
             None => (String::new(), String::new()),
         }
     };
-    Ok(SimpleResult::from(rdp_launcher::launch(&host, &username, &password)))
+    Ok(SimpleResult::from(rdp_launcher::launch(
+        &host, &username, &password,
+    )))
 }
 
 // ---- Import ----
@@ -140,7 +177,9 @@ async fn pick_file_and_import(
         let _ = tx.send(p);
     });
     let picked = rx.await.ok().flatten();
-    let Some(fp) = picked else { return ImportSummary::canceled() };
+    let Some(fp) = picked else {
+        return ImportSummary::canceled();
+    };
     let path = match fp.into_path() {
         Ok(p) => p,
         Err(e) => return ImportSummary::error(e.to_string()),
@@ -154,12 +193,18 @@ async fn pick_file_and_import(
 }
 
 #[tauri::command]
-pub async fn import_mremoteng(app: AppHandle, state: State<'_, AppState>) -> Result<ImportSummary, String> {
+pub async fn import_mremoteng(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<ImportSummary, String> {
     Ok(pick_file_and_import(&app, &state, import::parse_mremoteng).await)
 }
 
 #[tauri::command]
-pub async fn import_termius(app: AppHandle, state: State<'_, AppState>) -> Result<ImportSummary, String> {
+pub async fn import_termius(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<ImportSummary, String> {
     Ok(pick_file_and_import(&app, &state, import::parse_termius).await)
 }
 
@@ -172,7 +217,10 @@ pub fn plugins_list(state: State<AppState>) -> PluginResult {
 }
 
 #[tauri::command]
-pub async fn plugins_install(app: AppHandle, state: State<'_, AppState>) -> Result<PluginResult, String> {
+pub async fn plugins_install(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<PluginResult, String> {
     let config_dir = state.vault.lock().unwrap().config_dir.clone();
     let (tx, rx) = tokio::sync::oneshot::channel();
     app.dialog().file().pick_folder(move |p| {
@@ -180,11 +228,23 @@ pub async fn plugins_install(app: AppHandle, state: State<'_, AppState>) -> Resu
     });
     let picked = rx.await.ok().flatten();
     let Some(fp) = picked else {
-        return Ok(PluginResult { ok: false, error: Some("iptal edildi".into()), plugins: vec![], snippets: vec![] });
+        return Ok(PluginResult {
+            ok: false,
+            error: Some("iptal edildi".into()),
+            plugins: vec![],
+            snippets: vec![],
+        });
     };
     let path = match fp.into_path() {
         Ok(p) => p,
-        Err(e) => return Ok(PluginResult { ok: false, error: Some(e.to_string()), plugins: vec![], snippets: vec![] }),
+        Err(e) => {
+            return Ok(PluginResult {
+                ok: false,
+                error: Some(e.to_string()),
+                plugins: vec![],
+                snippets: vec![],
+            })
+        }
     };
     Ok(plugins::install(&config_dir, &path))
 }

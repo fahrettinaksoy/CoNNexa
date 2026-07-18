@@ -30,7 +30,9 @@ pub fn ai_ask(
             return;
         }
     };
-    state.ai.ask(app, request_id, model, api_key, prompt, context);
+    state
+        .ai
+        .ask(app, request_id, model, api_key, prompt, context);
 }
 
 #[tauri::command]

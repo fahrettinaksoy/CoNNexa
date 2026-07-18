@@ -1,20 +1,22 @@
 <script setup lang="ts">
-import { onMounted, ref, defineAsyncComponent } from 'vue'
+import type { ShortcutId } from '@/composables/keymap'
+import type { OverlaySheet } from '@/stores/ui'
+import { defineAsyncComponent, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useSettingsStore } from '@/stores/settings'
-import { useVaultStore } from '@/stores/vault'
-import { usePluginsStore } from '@/stores/plugins'
-import { useTeamsStore } from '@/stores/teams'
-import { useUiStore, type OverlaySheet } from '@/stores/ui'
-import { useResponsive } from '@/composables/useResponsive'
-import { useAppHotkeys } from '@/composables/useAppHotkeys'
-import { useAppLocale } from '@/composables/useAppLocale'
-import { useAppTheme } from '@/composables/useAppTheme'
-import { keysFor, type ShortcutId } from '@/composables/keymap'
-import WorkspaceView from '@/views/WorkspaceView.vue'
 import CommandPalette from '@/components/CommandPalette.vue'
 import HotkeyHelpDialog from '@/components/HotkeyHelpDialog.vue'
 import SideSheet from '@/components/SideSheet.vue'
+import { keysFor } from '@/composables/keymap'
+import { useAppHotkeys } from '@/composables/useAppHotkeys'
+import { useAppLocale } from '@/composables/useAppLocale'
+import { useAppTheme } from '@/composables/useAppTheme'
+import { useResponsive } from '@/composables/useResponsive'
+import { usePluginsStore } from '@/stores/plugins'
+import { useSettingsStore } from '@/stores/settings'
+import { useTeamsStore } from '@/stores/teams'
+import { useUiStore } from '@/stores/ui'
+import { useVaultStore } from '@/stores/vault'
+import WorkspaceView from '@/views/WorkspaceView.vue'
 
 // İçerik-ağır ikincil paneller yalnızca ilk açılışta yüklenir (lazy).
 const TunnelsView = defineAsyncComponent(() => import('@/views/TunnelsView.vue'))
@@ -38,9 +40,19 @@ const palette = ref<InstanceType<typeof CommandPalette> | null>(null)
 
 // Uygulama rayı: Çalışma alanı daima temel katmandır; diğerleri onun üzerine
 // sağdan kayan side sheet olarak açılır. `sheet: null` → tüm panelleri kapatır.
-const navItems: { icon: string; label: string; sheet: OverlaySheet | null; shortcut: ShortcutId }[] = [
+const navItems: {
+  icon: string
+  label: string
+  sheet: OverlaySheet | null
+  shortcut: ShortcutId
+}[] = [
   { icon: 'mdi-lan', label: 'nav.workspace', sheet: null, shortcut: 'goWorkspace' },
-  { icon: 'mdi-transit-connection-variant', label: 'nav.tunnels', sheet: 'tunnels', shortcut: 'goTunnels' },
+  {
+    icon: 'mdi-transit-connection-variant',
+    label: 'nav.tunnels',
+    sheet: 'tunnels',
+    shortcut: 'goTunnels'
+  },
   { icon: 'mdi-cloud-sync-outline', label: 'nav.sync', sheet: 'sync', shortcut: 'goSync' },
   { icon: 'mdi-account-group-outline', label: 'nav.teams', sheet: 'teams', shortcut: 'goTeams' }
 ]
@@ -84,8 +96,12 @@ onMounted(() => {
     <v-app-bar flat density="comfortable">
       <!-- Bardaki tüm butonlar text, tüm ipuçları alta açılır: tekrarı tek bir
            defaults-provider'da toplarız. -->
-      <v-defaults-provider :defaults="{ VBtn: { variant: 'text' }, VTooltip: { location: 'bottom' } }">
-        <div class="text-body-1 font-weight-medium ms-4 me-2 flex-shrink-0">{{ t('app.name') }}</div>
+      <v-defaults-provider
+        :defaults="{ VBtn: { variant: 'text' }, VTooltip: { location: 'bottom' } }"
+      >
+        <div class="text-body-1 font-weight-medium ms-4 me-2 flex-shrink-0">
+          {{ t('app.name') }}
+        </div>
         <v-divider vertical inset class="me-1" />
         <div class="d-flex align-center app-bar-nav">
           <template v-for="item in navItems" :key="item.label">
@@ -115,7 +131,11 @@ onMounted(() => {
             </div>
           </v-tooltip>
         </v-btn>
-        <v-btn icon="mdi-keyboard-outline" :aria-label="t('hotkeys.title')" @click="ui.helpOpen = true">
+        <v-btn
+          icon="mdi-keyboard-outline"
+          :aria-label="t('hotkeys.title')"
+          @click="ui.helpOpen = true"
+        >
           <v-icon icon="mdi-keyboard-outline" />
           <v-tooltip activator="parent">
             <div class="d-flex align-center ga-2">

@@ -1,5 +1,5 @@
-import { fileURLToPath, URL } from 'node:url'
 import process from 'node:process'
+import { fileURLToPath, URL } from 'node:url'
 
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'

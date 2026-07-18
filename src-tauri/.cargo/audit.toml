@@ -1,0 +1,17 @@
+# cargo-audit yapılandırması — `cargo audit` bu dosyayı OTOMATİK okur.
+#
+# Buradaki her ignore, güvenlik duruşunun BİLİNÇLİ ve BELGELİ bir istisnasıdır;
+# kapı geri kalan her advisory için AÇIK kalır. Yeni bir ignore eklerken mutlaka
+# gerekçe yaz — aksi halde bu dosya sessiz bir "hepsini görmezden gel"e döner.
+[advisories]
+ignore = [
+  # RUSTSEC-2023-0071 — `rsa` 0.9.x, Marvin timing side-channel (medium 5.9).
+  # `russh` üzerinden TRANSİTİF gelir (RSA anahtarlı SSH kimlik doğrulaması).
+  # Upstream'de düzeltilmiş sürüm YOK. Saldırı, aynı özel anahtarla çok sayıda
+  # işlemi hassas zamanlama ölçümüyle gözlemlemeyi gerektirir — masaüstü SSH
+  # istemcisi bağlamında pratik değeri düşük. Ed25519 anahtarlar zorunlu olunca
+  # (ya da rsa bunu çözen bir sürüme geçince) kaldırılacak.
+  "RUSTSEC-2023-0071",
+  # NOT: russh 0.45 → 0.61 yükseltmesi RUSTSEC-2026-0154/0153'ü (unbounded
+  # allocation) GERÇEKTEN düzeltti; o istisnalar kaldırıldı.
+]

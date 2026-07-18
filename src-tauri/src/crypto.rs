@@ -87,7 +87,9 @@ pub struct FieldCipher {
 
 impl FieldCipher {
     pub fn new(fallback_dir: PathBuf) -> Result<Self, String> {
-        Ok(Self { key: master_key(&fallback_dir)? })
+        Ok(Self {
+            key: master_key(&fallback_dir)?,
+        })
     }
 
     /// base64(nonce(12) || ciphertext+tag)
@@ -135,8 +137,7 @@ fn derive_key(passphrase: &str, salt: &[u8]) -> Result<[u8; 32], String> {
     // N=16384 → log_n=14, r=8, p=1, len=32 (TS ile aynı).
     let params = scrypt::Params::new(14, 8, 1, 32).map_err(|e| e.to_string())?;
     let mut key = [0u8; 32];
-    scrypt::scrypt(passphrase.as_bytes(), salt, &params, &mut key)
-        .map_err(|e| e.to_string())?;
+    scrypt::scrypt(passphrase.as_bytes(), salt, &params, &mut key).map_err(|e| e.to_string())?;
     Ok(key)
 }
 
@@ -151,7 +152,13 @@ pub fn encrypt_payload<T: Serialize>(payload: &T, passphrase: &str) -> Result<St
     let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(&key));
     // aes-gcm tag'ı ciphertext'e ekler; TS formatı için ayır.
     let mut sealed = cipher
-        .encrypt(Nonce::from_slice(&iv), Payload { msg: &plaintext, aad: b"" })
+        .encrypt(
+            Nonce::from_slice(&iv),
+            Payload {
+                msg: &plaintext,
+                aad: b"",
+            },
+        )
         .map_err(|_| "şifreleme başarısız".to_string())?;
     let tag = sealed.split_off(sealed.len() - 16);
     let blob = Blob {
@@ -171,18 +178,74 @@ pub fn decrypt_payload<T: for<'de> Deserialize<'de>>(
     blob_b64: &str,
     passphrase: &str,
 ) -> Result<T, String> {
-    let json = B64.decode(blob_b64.trim().as_bytes()).map_err(|e| e.to_string())?;
+    let json = B64
+        .decode(blob_b64.trim().as_bytes())
+        .map_err(|e| e.to_string())?;
     let blob: Blob = serde_json::from_slice(&json).map_err(|e| e.to_string())?;
-    let salt = B64.decode(blob.salt.as_bytes()).map_err(|e| e.to_string())?;
+    let salt = B64
+        .decode(blob.salt.as_bytes())
+        .map_err(|e| e.to_string())?;
     let iv = B64.decode(blob.iv.as_bytes()).map_err(|e| e.to_string())?;
     let tag = B64.decode(blob.tag.as_bytes()).map_err(|e| e.to_string())?;
-    let data = B64.decode(blob.data.as_bytes()).map_err(|e| e.to_string())?;
+    let data = B64
+        .decode(blob.data.as_bytes())
+        .map_err(|e| e.to_string())?;
     let key = derive_key(passphrase, &salt)?;
     let cipher = Aes256Gcm::new(Key::<Aes256Gcm>::from_slice(&key));
     let mut combined = data;
     combined.extend_from_slice(&tag);
     let pt = cipher
-        .decrypt(Nonce::from_slice(&iv), Payload { msg: &combined, aad: b"" })
+        .decrypt(
+            Nonce::from_slice(&iv),
+            Payload {
+                msg: &combined,
+                aad: b"",
+            },
+        )
         .map_err(|_| "çözme başarısız (yanlış parola?)".to_string())?;
     serde_json::from_slice(&pt).map_err(|e| e.to_string())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[derive(serde::Serialize, serde::Deserialize, PartialEq, Debug)]
+    struct Sample {
+        a: u32,
+        b: String,
+    }
+
+    #[test]
+    fn payload_round_trip() {
+        let s = Sample {
+            a: 42,
+            b: "gizli".into(),
+        };
+        let blob = encrypt_payload(&s, "parola123").unwrap();
+        let back: Sample = decrypt_payload(&blob, "parola123").unwrap();
+        assert_eq!(s, back);
+    }
+
+    #[test]
+    fn wrong_passphrase_fails() {
+        let s = Sample {
+            a: 1,
+            b: "x".into(),
+        };
+        let blob = encrypt_payload(&s, "dogru").unwrap();
+        assert!(decrypt_payload::<Sample>(&blob, "yanlis").is_err());
+    }
+
+    #[test]
+    fn tampered_blob_fails() {
+        let s = Sample {
+            a: 7,
+            b: "z".into(),
+        };
+        let blob = encrypt_payload(&s, "p").unwrap();
+        let mut bad = blob.clone();
+        bad.push('X'); // base64'ü boz
+        assert!(decrypt_payload::<Sample>(&bad, "p").is_err());
+    }
 }

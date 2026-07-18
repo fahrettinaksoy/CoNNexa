@@ -39,8 +39,14 @@ pub async fn session_create(
             match state
                 .sessions
                 .create_ssh(
-                    host_id, host.name.clone(), addr, port, auth, host.startup_command.clone(),
-                    req.cols, req.rows,
+                    host_id,
+                    host.name.clone(),
+                    addr,
+                    port,
+                    auth,
+                    host.startup_command.clone(),
+                    req.cols,
+                    req.rows,
                 )
                 .await
             {
@@ -50,14 +56,23 @@ pub async fn session_create(
         }
         Protocol::Telnet => {
             let port = if host.port == 0 { 23 } else { host.port };
-            match state.sessions.create_telnet(host_id, host.name.clone(), host.hostname.clone(), port).await {
+            match state
+                .sessions
+                .create_telnet(host_id, host.name.clone(), host.hostname.clone(), port)
+                .await
+            {
                 Ok(s) => Ok(ok(s)),
                 Err(e) => Ok(err(e)),
             }
         }
         Protocol::Serial => {
             let baud = if host.port == 0 { 9600 } else { host.port } as u32;
-            match state.sessions.create_serial(host_id, host.name.clone(), host.hostname.clone(), baud) {
+            match state.sessions.create_serial(
+                host_id,
+                host.name.clone(),
+                host.hostname.clone(),
+                baud,
+            ) {
                 Ok(s) => Ok(ok(s)),
                 Err(e) => Ok(err(e)),
             }
@@ -66,7 +81,9 @@ pub async fn session_create(
             Ok(s) => ok(s),
             Err(e) => err(e),
         }),
-        Protocol::Vnc | Protocol::Rdp => crate::proxy::create_bridge_session(state, host, host_id).await,
+        Protocol::Vnc | Protocol::Rdp => {
+            crate::proxy::create_bridge_session(state, host, host_id).await
+        }
     }
 }
 
@@ -86,8 +103,16 @@ pub fn session_close(state: State<AppState>, id: String) {
 }
 
 fn ok(session: SessionDescriptor) -> CreateSessionResult {
-    CreateSessionResult { ok: true, session: Some(session), error: None }
+    CreateSessionResult {
+        ok: true,
+        session: Some(session),
+        error: None,
+    }
 }
 fn err(msg: impl Into<String>) -> CreateSessionResult {
-    CreateSessionResult { ok: false, session: None, error: Some(msg.into()) }
+    CreateSessionResult {
+        ok: false,
+        session: None,
+        error: Some(msg.into()),
+    }
 }

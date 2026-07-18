@@ -1,4 +1,5 @@
-import { computed, type ComputedRef } from 'vue'
+import type { ComputedRef } from 'vue'
+import { computed } from 'vue'
 import { useDisplay } from 'vuetify'
 
 type Display = ReturnType<typeof useDisplay>
@@ -77,7 +78,8 @@ export function useResponsive(): ResponsiveLayout {
   const platformClasses = computed(() => {
     const p = display.platform.value
     const classes: string[] = []
-    if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) classes.push('platform-tauri')
+    if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window)
+      classes.push('platform-tauri')
     if (p.mac) classes.push('platform-mac')
     if (p.win) classes.push('platform-win')
     if (p.linux) classes.push('platform-linux')

@@ -3,6 +3,18 @@ import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useResponsive } from '@/composables/useResponsive'
 
+const props = withDefaults(
+  defineProps<{
+    /** Üst başlık metni. */
+    title: string
+    /** Başlıkta gösterilecek ikon (opsiyonel). */
+    icon?: string
+    /** Geniş penceredeki panel genişliği (px). */
+    width?: number | string
+  }>(),
+  { width: 560 }
+)
+
 /**
  * SideSheet — Connexa'nın tek "modal panel" primitifi (Material 3 side sheet).
  *
@@ -28,18 +40,6 @@ import { useResponsive } from '@/composables/useResponsive'
  */
 const open = defineModel<boolean>({ default: false })
 
-const props = withDefaults(
-  defineProps<{
-    /** Üst başlık metni. */
-    title: string
-    /** Başlıkta gösterilecek ikon (opsiyonel). */
-    icon?: string
-    /** Geniş penceredeki panel genişliği (px). */
-    width?: number | string
-  }>(),
-  { width: 560 }
-)
-
 const { t } = useI18n()
 const { compact } = useResponsive()
 
@@ -61,11 +61,7 @@ const contentWidth = computed(() =>
       <v-toolbar color="primary" density="comfortable" flat class="flex-grow-0">
         <v-icon v-if="icon" :icon="icon" class="ms-4 me-1" />
         <v-toolbar-title class="text-body-1 font-weight-medium">{{ title }}</v-toolbar-title>
-        <v-btn
-          icon="mdi-close"
-          :aria-label="t('common.close')"
-          @click="open = false"
-        />
+        <v-btn icon="mdi-close" :aria-label="t('common.close')" @click="open = false" />
       </v-toolbar>
 
       <!-- GÖVDE — kaydırılabilir içerik -->

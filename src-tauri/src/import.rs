@@ -42,7 +42,11 @@ impl ParsedImport {
             None => format!("{username} (agent)"),
         };
         if !self.identities.iter().any(|i| i.name == name) {
-            let auth_type = if key_path.is_some() { AuthType::Key } else { AuthType::Agent };
+            let auth_type = if key_path.is_some() {
+                AuthType::Key
+            } else {
+                AuthType::Agent
+            };
             self.identities.push(ParsedIdentity {
                 name: name.clone(),
                 username: username.to_string(),
@@ -56,7 +60,10 @@ impl ParsedImport {
 
 fn expand_home(path: &str) -> String {
     if let Some(rest) = path.strip_prefix("~/") {
-        if let Some(home) = std::env::var("HOME").ok().or_else(|| std::env::var("USERPROFILE").ok()) {
+        if let Some(home) = std::env::var("HOME")
+            .ok()
+            .or_else(|| std::env::var("USERPROFILE").ok())
+        {
             return format!("{home}/{rest}");
         }
     }
@@ -66,7 +73,9 @@ fn expand_home(path: &str) -> String {
 // ---- ssh_config ----
 
 pub fn default_ssh_config_path() -> Option<String> {
-    let home = std::env::var("HOME").ok().or_else(|| std::env::var("USERPROFILE").ok())?;
+    let home = std::env::var("HOME")
+        .ok()
+        .or_else(|| std::env::var("USERPROFILE").ok())?;
     Some(format!("{home}/.ssh/config"))
 }
 
@@ -90,7 +99,9 @@ pub fn parse_ssh_config(content: &str) -> ParsedImport {
                     blocks.push(b);
                 }
                 // wildcard içermeyen ilk alias
-                let alias = val.split_whitespace().find(|a| !a.contains('*') && !a.contains('?'));
+                let alias = val
+                    .split_whitespace()
+                    .find(|a| !a.contains('*') && !a.contains('?'));
                 cur = alias.map(|a| (a.to_string(), None, None, 0u16, None));
             }
             "hostname" => {
@@ -148,29 +159,46 @@ pub fn parse_mremoteng(content: &str) -> ParsedImport {
     let mut group_stack: Vec<String> = Vec::new();
 
     let attr = |e: &quick_xml::events::BytesStart, name: &[u8]| -> Option<String> {
-        e.attributes().flatten().find(|a| a.key.as_ref() == name).map(|a| {
-            String::from_utf8_lossy(&a.value).to_string()
-        })
+        e.attributes()
+            .flatten()
+            .find(|a| a.key.as_ref() == name)
+            .map(|a| String::from_utf8_lossy(&a.value).to_string())
     };
 
     // Her açık <Node> için container mı bilgisini tut; End'te ona göre pop.
     let mut node_is_container: Vec<bool> = Vec::new();
 
-    let process_node = |out: &mut ParsedImport, e: &quick_xml::events::BytesStart, group_stack: &Vec<String>| -> bool {
+    let process_node = |out: &mut ParsedImport,
+                        e: &quick_xml::events::BytesStart,
+                        group_stack: &Vec<String>|
+     -> bool {
         let node_type = attr(e, b"Type").unwrap_or_default();
         let name = attr(e, b"Name").unwrap_or_default();
         if node_type.eq_ignore_ascii_case("Container") {
-            out.groups.push(ParsedGroup { name: name.clone(), parent_name: group_stack.last().cloned() });
+            out.groups.push(ParsedGroup {
+                name: name.clone(),
+                parent_name: group_stack.last().cloned(),
+            });
             true
         } else {
             let hostname = attr(e, b"Hostname").unwrap_or_default();
             let proto = attr(e, b"Protocol").unwrap_or_default().to_lowercase();
             let protocol = map_protocol(&proto);
-            let port = attr(e, b"Port").and_then(|p| p.parse::<u16>().ok()).unwrap_or(default_port(protocol));
+            let port = attr(e, b"Port")
+                .and_then(|p| p.parse::<u16>().ok())
+                .unwrap_or(default_port(protocol));
             let username = attr(e, b"Username").unwrap_or_default();
-            let identity_name = if !username.is_empty() { Some(out.ensure_identity(&username, None)) } else { None };
+            let identity_name = if !username.is_empty() {
+                Some(out.ensure_identity(&username, None))
+            } else {
+                None
+            };
             out.hosts.push(ParsedHost {
-                name: if name.is_empty() { hostname.clone() } else { name },
+                name: if name.is_empty() {
+                    hostname.clone()
+                } else {
+                    name
+                },
                 protocol,
                 hostname,
                 port,
@@ -298,5 +326,68 @@ fn default_port(p: Protocol) -> u16 {
         Protocol::Vnc => 5900,
         Protocol::Serial => 9600,
         Protocol::Local => 0,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn ssh_config_basic() {
+        let cfg = "Host web\n  HostName 10.0.0.1\n  User deploy\n  Port 2222\n";
+        let out = parse_ssh_config(cfg);
+        assert_eq!(out.hosts.len(), 1);
+        let h = &out.hosts[0];
+        assert_eq!(h.name, "web");
+        assert_eq!(h.hostname, "10.0.0.1");
+        assert_eq!(h.port, 2222);
+        assert_eq!(h.protocol, Protocol::Ssh);
+        assert!(h.identity_name.is_some());
+        assert_eq!(out.identities.len(), 1);
+        assert_eq!(out.identities[0].auth_type, AuthType::Agent);
+    }
+
+    #[test]
+    fn ssh_config_default_port_and_wildcard() {
+        let cfg = "Host *\n  User root\nHost box\n  HostName h.example\n";
+        let out = parse_ssh_config(cfg);
+        // wildcard 'Host *' atlanır; yalnız 'box'
+        assert_eq!(out.hosts.len(), 1);
+        assert_eq!(out.hosts[0].name, "box");
+        assert_eq!(out.hosts[0].port, 22); // varsayılan
+    }
+
+    #[test]
+    fn ssh_config_key_identity() {
+        let cfg = "Host k\n  HostName h\n  User u\n  IdentityFile /keys/id_ed25519\n";
+        let out = parse_ssh_config(cfg);
+        assert_eq!(out.identities.len(), 1);
+        assert_eq!(out.identities[0].auth_type, AuthType::Key);
+        assert_eq!(
+            out.identities[0].private_key_path.as_deref(),
+            Some("/keys/id_ed25519")
+        );
+    }
+
+    #[test]
+    fn termius_json_flexible() {
+        let json = r#"[{"label":"srv","address":"1.2.3.4","port":22,"username":"root"}]"#;
+        let out = parse_termius(json);
+        assert_eq!(out.hosts.len(), 1);
+        assert_eq!(out.hosts[0].hostname, "1.2.3.4");
+        assert_eq!(out.hosts[0].name, "srv");
+    }
+
+    #[test]
+    fn mremoteng_container_and_connection() {
+        let xml = r#"<Connections><Node Type="Container" Name="Prod"><Node Type="Connection" Name="db" Hostname="10.0.0.9" Protocol="SSH2" Port="22" Username="admin"/></Node></Connections>"#;
+        let out = parse_mremoteng(xml);
+        assert_eq!(out.groups.len(), 1);
+        assert_eq!(out.groups[0].name, "Prod");
+        assert_eq!(out.hosts.len(), 1);
+        assert_eq!(out.hosts[0].hostname, "10.0.0.9");
+        assert_eq!(out.hosts[0].group_name.as_deref(), Some("Prod"));
+        assert_eq!(out.hosts[0].protocol, Protocol::Ssh);
     }
 }

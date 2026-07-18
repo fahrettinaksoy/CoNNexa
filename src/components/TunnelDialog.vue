@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useRules } from '@/composables/rules'
-import CrudDialog from '@/components/CrudDialog.vue'
 import type { Tunnel, TunnelType } from '@shared/types'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import CrudDialog from '@/components/CrudDialog.vue'
+import { useRules } from '@/composables/rules'
+import { useVaultStore } from '@/stores/vault'
 
-const model = defineModel<boolean>({ default: false })
 const props = defineProps<{ tunnel?: Tunnel | null }>()
-
+const model = defineModel<boolean>({ default: false })
 const { t } = useI18n()
 const vault = useVaultStore()
 const { required, port } = useRules()
@@ -59,62 +58,45 @@ async function save(): Promise<void> {
 </script>
 
 <template>
-  <CrudDialog
-    v-model="model"
-    :title="tunnel ? t('tunnels.edit') : t('tunnels.add')"
-    @save="save"
-  >
-    <v-text-field
-      v-model="form.name"
-      :label="t('tunnels.name')"
+  <CrudDialog v-model="model" :title="tunnel ? t('tunnels.edit') : t('tunnels.add')" @save="save">
+    <v-text-field v-model="form.name" :label="t('tunnels.name')" :rules="[required]" autofocus />
+    <v-select v-model="form.type" :items="typeItems" :label="t('tunnels.type')" />
+    <v-select
+      v-model="form.hostId"
+      :items="hostItems"
+      :label="t('tunnels.host')"
       :rules="[required]"
-      autofocus
     />
-        <v-select
-          v-model="form.type"
-          :items="typeItems"
-          :label="t('tunnels.type')"
-        />
-        <v-select
-          v-model="form.hostId"
-          :items="hostItems"
-          :label="t('tunnels.host')"
+    <v-row>
+      <v-col cols="8">
+        <v-text-field
+          v-model="form.listenHost"
+          :label="t('tunnels.listenHost')"
           :rules="[required]"
         />
-        <v-row>
-          <v-col cols="8">
-            <v-text-field
-              v-model="form.listenHost"
-              :label="t('tunnels.listenHost')"
-              :rules="[required]"
-            />
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model.number="form.listenPort"
-              :label="t('tunnels.listenPort')"
-              type="number"
-              :rules="[port]"
-            />
-          </v-col>
-        </v-row>
-        <v-row v-if="needsDest" dense>
-          <v-col cols="8">
-            <v-text-field
-              v-model="form.destHost"
-              :label="t('tunnels.destHost')"
-              :rules="[required]"
-            />
-          </v-col>
-          <v-col cols="4">
-            <v-text-field
-              v-model.number="form.destPort"
-              :label="t('tunnels.destPort')"
-              type="number"
-              :rules="[port]"
-            />
-          </v-col>
-        </v-row>
-        <div class="text-caption text-medium-emphasis">{{ t(`tunnels.hints.${form.type}`) }}</div>
+      </v-col>
+      <v-col cols="4">
+        <v-text-field
+          v-model.number="form.listenPort"
+          :label="t('tunnels.listenPort')"
+          type="number"
+          :rules="[port]"
+        />
+      </v-col>
+    </v-row>
+    <v-row v-if="needsDest" dense>
+      <v-col cols="8">
+        <v-text-field v-model="form.destHost" :label="t('tunnels.destHost')" :rules="[required]" />
+      </v-col>
+      <v-col cols="4">
+        <v-text-field
+          v-model.number="form.destPort"
+          :label="t('tunnels.destPort')"
+          type="number"
+          :rules="[port]"
+        />
+      </v-col>
+    </v-row>
+    <div class="text-caption text-medium-emphasis">{{ t(`tunnels.hints.${form.type}`) }}</div>
   </CrudDialog>
 </template>

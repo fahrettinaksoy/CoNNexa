@@ -1,18 +1,17 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue'
-import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useRules } from '@/composables/rules'
-import CrudDialog from '@/components/CrudDialog.vue'
 import type { Group } from '@shared/types'
+import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+import CrudDialog from '@/components/CrudDialog.vue'
+import { useRules } from '@/composables/rules'
+import { useVaultStore } from '@/stores/vault'
 
-const model = defineModel<boolean>({ default: false })
 const props = defineProps<{
   group?: Group | null
   /** Yeni grup için önerilen üst grup */
   parentId?: string
 }>()
-
+const model = defineModel<boolean>({ default: false })
 const { t } = useI18n()
 const vault = useVaultStore()
 const { required } = useRules()
@@ -21,9 +20,7 @@ const form = ref<Group>({ id: '', name: '' })
 
 watch(model, (openNow) => {
   if (!openNow) return
-  form.value = props.group
-    ? { ...props.group }
-    : { id: '', name: '', parentId: props.parentId }
+  form.value = props.group ? { ...props.group } : { id: '', name: '', parentId: props.parentId }
 })
 
 /** Düzenlenen grubun kendisi ve tüm altları üst grup olamaz (döngü koruması) */
@@ -61,18 +58,8 @@ async function save(): Promise<void> {
     :max-width="440"
     @save="save"
   >
-    <v-text-field
-      v-model="form.name"
-      :label="t('groups.name')"
-      :rules="[required]"
-      autofocus
-    />
-    <v-select
-      v-model="form.parentId"
-      :items="parentItems"
-      :label="t('groups.parent')"
-      clearable
-    />
+    <v-text-field v-model="form.name" :label="t('groups.name')" :rules="[required]" autofocus />
+    <v-select v-model="form.parentId" :items="parentItems" :label="t('groups.parent')" clearable />
     <v-select
       v-model="form.identityId"
       :items="identityItems"

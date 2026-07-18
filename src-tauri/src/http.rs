@@ -98,7 +98,12 @@ pub async fn webdav_put(
     Ok(())
 }
 
-pub async fn webdav_get(url: &str, user: &str, pass: &str, filename: &str) -> Result<String, String> {
+pub async fn webdav_get(
+    url: &str,
+    user: &str,
+    pass: &str,
+    filename: &str,
+) -> Result<String, String> {
     let auth = B64.encode(format!("{user}:{pass}"));
     let resp = client()
         .get(webdav_url(url, filename))

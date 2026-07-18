@@ -1,0 +1,100 @@
+name: CI
+
+# Kalite kapısı: her push ve PR'da tip kontrolü + lint + test.
+# Bozuk tip / lint hatası / kırık test main'e sızamaz.
+#
+# NOT: `npm ci` package-lock.json'ı BİREBİR kurar — geliştiricinin yerel
+# node_modules'ı ile lock'un ayrışması böyle yakalanır.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Eş zamanlılık: aynı dala/PR'a arka arkaya push gelince ÖNCEKİ koşuyu iptal et.
+# İptal yalnız PR'larda — main push'ları tamamlanmaya devam eder.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm run test:coverage
+
+  # Rust kalite kapısı — src-tauri/. Native uzak erişim katmanı (ssh/pty/sftp/
+  # tünel/proxy) buradadır; fmt + clippy + test yeşil olmadan geçilemez.
+  rust:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src-tauri
+    steps:
+      - uses: actions/checkout@v7
+
+      # tauri crate'i webkit2gtk vb.'ye LİNK eder — testleri derlemek için bile
+      # bu sistem kütüphaneleri şart (release.yml ile aynı liste).
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf build-essential curl wget file libssl-dev libgtk-3-dev libudev-dev
+
+      # Sürüm rust-toolchain.toml ile hizalı (elle güncellenir).
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: 1.96.1
+          components: rustfmt, clippy
+
+      # target/ ve registry önbelleği — soğuk derleme dakikalar, sıcak saniyeler.
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri
+
+      - name: Format check
+        run: cargo fmt --check
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test
+
+      # cargo audit: Cargo.lock src-tauri/'de. Prebuilt binary (taiki-e).
+      - uses: taiki-e/install-action@cargo-audit
+      - name: cargo audit (RustSec advisories)
+        run: cargo audit
+
+  # Tedarik zinciri kapısı — bilinen CVE'li bir bağımlılık sürümü sızmasın.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # SADECE üretime giden bağımlılıklar (--omit=dev). Eşik "high".
+      - name: npm audit (production deps)
+        run: npm audit --omit=dev --audit-level=high

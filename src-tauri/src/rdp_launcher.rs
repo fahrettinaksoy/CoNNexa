@@ -4,7 +4,14 @@
 use crate::types::Host;
 
 pub fn launch(host: &Host, username: &str, password: &str) -> Result<(), String> {
-    let addr = format!("{}:{}", host.hostname, if host.port == 0 { 3389 } else { host.port });
+    // addr yalnız windows/macos kollarında kullanılır; linux xfreerdp'de host+port
+    // ayrı geçer. Platforma göre kullanılmadığında uyarı vermesin.
+    #[allow(unused_variables)]
+    let addr = format!(
+        "{}:{}",
+        host.hostname,
+        if host.port == 0 { 3389 } else { host.port }
+    );
 
     #[cfg(target_os = "windows")]
     {
@@ -23,7 +30,9 @@ pub fn launch(host: &Host, username: &str, password: &str) -> Result<(), String>
         let target2 = target.clone();
         std::thread::spawn(move || {
             std::thread::sleep(std::time::Duration::from_secs(20));
-            let _ = Command::new("cmdkey").arg(format!("/delete:{target2}")).output();
+            let _ = Command::new("cmdkey")
+                .arg(format!("/delete:{target2}"))
+                .output();
         });
         return Ok(());
     }

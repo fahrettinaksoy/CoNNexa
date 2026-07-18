@@ -1,27 +1,27 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onActivated, onDeactivated, provide, watch } from 'vue'
+import type { Group, Host, IdentityPublic, Snippet } from '@shared/types'
+import { computed, onActivated, onDeactivated, onMounted, provide, ref, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { useVaultStore } from '@/stores/vault'
-import { useSessionsStore } from '@/stores/sessions'
-import { useRecordingsStore } from '@/stores/recordings'
-import { hostActionsKey } from '@/composables/hostActions'
-import { useResponsive } from '@/composables/useResponsive'
-import { useAppHotkeys } from '@/composables/useAppHotkeys'
-import { useWorkbenchTheme } from '@/composables/useWorkbenchTheme'
-import { keysFor } from '@/composables/keymap'
-import { protocolIcon } from '@/plugins/icons'
+import AiAssistantDialog from '@/components/AiAssistantDialog.vue'
+import GroupDialog from '@/components/GroupDialog.vue'
+import HostDialog from '@/components/HostDialog.vue'
+import HostListItem from '@/components/HostListItem.vue'
+import HostTreeNode from '@/components/HostTreeNode.vue'
+import IdentityDialog from '@/components/IdentityDialog.vue'
+import LtrRegion from '@/components/LtrRegion.vue'
+import MonitorPanel from '@/components/MonitorPanel.vue'
 import SessionPane from '@/components/SessionPane.vue'
 import SftpPanel from '@/components/SftpPanel.vue'
-import MonitorPanel from '@/components/MonitorPanel.vue'
-import HostDialog from '@/components/HostDialog.vue'
-import IdentityDialog from '@/components/IdentityDialog.vue'
-import GroupDialog from '@/components/GroupDialog.vue'
 import SnippetDialog from '@/components/SnippetDialog.vue'
-import AiAssistantDialog from '@/components/AiAssistantDialog.vue'
-import HostTreeNode from '@/components/HostTreeNode.vue'
-import HostListItem from '@/components/HostListItem.vue'
-import LtrRegion from '@/components/LtrRegion.vue'
-import type { Host, Group, Snippet, IdentityPublic } from '@shared/types'
+import { hostActionsKey } from '@/composables/hostActions'
+import { keysFor } from '@/composables/keymap'
+import { useAppHotkeys } from '@/composables/useAppHotkeys'
+import { useResponsive } from '@/composables/useResponsive'
+import { useWorkbenchTheme } from '@/composables/useWorkbenchTheme'
+import { protocolIcon } from '@/plugins/icons'
+import { useRecordingsStore } from '@/stores/recordings'
+import { useSessionsStore } from '@/stores/sessions'
+import { useVaultStore } from '@/stores/vault'
 
 const { t } = useI18n()
 const vault = useVaultStore()
@@ -84,9 +84,7 @@ const showSftp = ref(true)
 const showMonitor = ref(false)
 const aiDialog = ref(false)
 
-const activeSession = computed(() =>
-  sessions.open.find((s) => s.id === sessions.activeId)
-)
+const activeSession = computed(() => sessions.open.find((s) => s.id === sessions.activeId))
 
 /** Aktif pane terminal türündeyse bölünebilir */
 const canSplitActive = computed(() => {
@@ -106,7 +104,7 @@ const sftpEligible = computed(() => {
 
 /** Yardımcı panellerin (SFTP / Monitor) bağlanacağı aktif oturum. */
 const auxSessionId = computed(() =>
-  sftpEligible.value ? sessions.activeGroup?.activePaneId ?? null : null
+  sftpEligible.value ? (sessions.activeGroup?.activePaneId ?? null) : null
 )
 
 onMounted(() => {
@@ -298,7 +296,11 @@ useAppHotkeys(
             </v-tab>
           </v-tabs>
 
-          <v-tabs-window v-model="section" class="flex-grow-1 overflow-y-auto pa-2" style="min-width: 0">
+          <v-tabs-window
+            v-model="section"
+            class="flex-grow-1 overflow-y-auto pa-2"
+            style="min-width: 0"
+          >
             <!-- Sunucular -->
             <v-tabs-window-item value="hosts">
               <div class="text-overline text-medium-emphasis px-1 mb-1">{{ t('hosts.title') }}</div>
@@ -357,7 +359,9 @@ useAppHotkeys(
 
             <!-- Kimlikler -->
             <v-tabs-window-item value="identities">
-              <div class="text-overline text-medium-emphasis px-1 mb-1">{{ t('identities.title') }}</div>
+              <div class="text-overline text-medium-emphasis px-1 mb-1">
+                {{ t('identities.title') }}
+              </div>
               <v-btn
                 block
                 size="small"
@@ -379,7 +383,10 @@ useAppHotkeys(
                 clearable
                 class="mb-2"
               />
-              <div v-if="vault.identities.length === 0" class="text-caption text-medium-emphasis pa-2">
+              <div
+                v-if="vault.identities.length === 0"
+                class="text-caption text-medium-emphasis pa-2"
+              >
                 {{ t('identities.empty') }}
               </div>
               <div
@@ -412,7 +419,9 @@ useAppHotkeys(
 
             <!-- Komut parçacıkları -->
             <v-tabs-window-item value="snippets">
-              <div class="text-overline text-medium-emphasis px-1 mb-1">{{ t('snippets.title') }}</div>
+              <div class="text-overline text-medium-emphasis px-1 mb-1">
+                {{ t('snippets.title') }}
+              </div>
               <v-btn
                 block
                 size="small"
@@ -434,7 +443,10 @@ useAppHotkeys(
                 clearable
                 class="mb-2"
               />
-              <div v-if="vault.snippets.length === 0" class="text-caption text-medium-emphasis pa-2">
+              <div
+                v-if="vault.snippets.length === 0"
+                class="text-caption text-medium-emphasis pa-2"
+              >
                 {{ t('snippets.empty') }}
               </div>
               <div
@@ -666,8 +678,8 @@ useAppHotkeys(
         <template v-if="sessions.groups.length > 0">
           <div
             v-for="group in sessions.groups"
-            :key="group.id"
             v-show="sessions.activeGroupId === group.id"
+            :key="group.id"
             class="fill-height d-flex"
           >
             <!-- Pane grubu: tek pane ya da split (row/col).
@@ -704,7 +716,13 @@ useAppHotkeys(
           <div class="text-body-2 text-medium-emphasis mt-1" style="max-width: 360px">
             {{ t('sessions.welcomeText') }}
           </div>
-          <v-btn color="primary" variant="tonal" prepend-icon="mdi-console" class="mt-4" @click="openLocal">
+          <v-btn
+            color="primary"
+            variant="tonal"
+            prepend-icon="mdi-console"
+            class="mt-4"
+            @click="openLocal"
+          >
             {{ t('sessions.localTerminal') }}
           </v-btn>
         </div>
@@ -725,11 +743,7 @@ useAppHotkeys(
     >
       {{ connectError }}
     </v-snackbar>
-    <v-snackbar
-      :model-value="notice !== null"
-      timeout="3000"
-      @update:model-value="notice = null"
-    >
+    <v-snackbar :model-value="notice !== null" timeout="3000" @update:model-value="notice = null">
       {{ notice }}
     </v-snackbar>
   </v-layout>

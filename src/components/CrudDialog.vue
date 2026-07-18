@@ -1,23 +1,8 @@
 <script setup lang="ts">
+import type { VForm } from 'vuetify/components'
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import SideSheet from '@/components/SideSheet.vue'
-import type { VForm } from 'vuetify/components'
-
-/**
- * CrudDialog — CRUD ekle/düzenle formları için yeniden kullanılabilir kabuk.
- *
- * Beş varlık formu (Host/Identity/Group/Snippet/Tunnel) + ekip düzenleme yapı
- * olarak ~%90 aynıydı: başlık + form alanları + iptal/kaydet, artı gönderimde
- * doğrulama. Tümü tek [[side-sheet]] deseninde açılır: sağdan kayan panel,
- * **primary başlık**, sabit **footer**. Her form yalnızca kendi **alanlarını**
- * (default slot) ve **kaydetme mantığını** (`@save`) sağlar.
- *
- * - `v-model` (defineModel) panelin açık/kapalı durumunu iki yönlü bağlar.
- * - `<v-form>` sahipliği burada; gönderimde `validate()` çalışır, yalnızca
- *   geçerliyse `save` yayılır. Alanlar slot'ta `:rules` ile gelir (bkz. [[rules]]).
- */
-const open = defineModel<boolean>({ default: false })
 
 withDefaults(
   defineProps<{
@@ -33,6 +18,21 @@ const emit = defineEmits<{
   /** Form doğrulaması geçtiğinde yayılır; ebeveyn kaydetme işini yapar. */
   save: []
 }>()
+
+/**
+ * CrudDialog — CRUD ekle/düzenle formları için yeniden kullanılabilir kabuk.
+ *
+ * Beş varlık formu (Host/Identity/Group/Snippet/Tunnel) + ekip düzenleme yapı
+ * olarak ~%90 aynıydı: başlık + form alanları + iptal/kaydet, artı gönderimde
+ * doğrulama. Tümü tek [[side-sheet]] deseninde açılır: sağdan kayan panel,
+ * **primary başlık**, sabit **footer**. Her form yalnızca kendi **alanlarını**
+ * (default slot) ve **kaydetme mantığını** (`@save`) sağlar.
+ *
+ * - `v-model` (defineModel) panelin açık/kapalı durumunu iki yönlü bağlar.
+ * - `<v-form>` sahipliği burada; gönderimde `validate()` çalışır, yalnızca
+ *   geçerliyse `save` yayılır. Alanlar slot'ta `:rules` ile gelir (bkz. [[rules]]).
+ */
+const open = defineModel<boolean>({ default: false })
 
 const { t } = useI18n()
 const formRef = ref<VForm>()

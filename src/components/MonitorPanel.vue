@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, computed } from 'vue'
+import type { HostMetrics } from '@shared/types'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LtrRegion from '@/components/LtrRegion.vue'
-import type { HostMetrics } from '@shared/types'
 
 const props = defineProps<{ sessionId: string }>()
 
@@ -64,105 +64,110 @@ function barColor(pct: number): string {
   <!-- Metrikler, disk yolları ve süreç komut satırları teknik içeriktir: LTR yalıtılır. -->
   <LtrRegion>
     <div class="d-flex flex-column fill-height monitor-panel">
-    <div class="d-flex align-center px-3 py-2 flex-grow-0">
-      <v-icon icon="mdi-gauge" size="small" class="mr-2" />
-      <span class="text-subtitle-2">{{ t('monitor.title') }}</span>
-      <v-spacer />
-      <v-btn
-        icon="mdi-refresh"
-        size="x-small"
-        variant="text"
-        :loading="loading"
-        :title="t('sftp.refresh')"
-        @click="refresh"
-      />
-    </div>
-    <v-divider />
-
-    <div class="flex-grow-1 overflow-y-auto pa-3">
-      <template v-if="metrics && !metrics.ok">
-        <v-alert type="warning">
-          {{ metrics.error || t('monitor.unavailable') }}
-        </v-alert>
-      </template>
-
-      <template v-else-if="metrics">
-        <!-- Uptime -->
-        <div class="text-caption text-medium-emphasis mb-1">{{ t('monitor.uptime') }}</div>
-        <div class="text-body-2 mb-4">{{ metrics.uptime || '—' }}</div>
-
-        <!-- CPU / load -->
-        <div class="d-flex justify-space-between text-caption mb-1">
-          <span>{{ t('monitor.cpu') }} ({{ metrics.cpuCount ?? '?' }} {{ t('monitor.cores') }})</span>
-          <span>{{ loadPercent }}%</span>
-        </div>
-        <v-progress-linear
-          :model-value="loadPercent"
-          :color="barColor(loadPercent)"
-          height="8"
-          rounded
-          class="mb-1"
+      <div class="d-flex align-center px-3 py-2 flex-grow-0">
+        <v-icon icon="mdi-gauge" size="small" class="mr-2" />
+        <span class="text-subtitle-2">{{ t('monitor.title') }}</span>
+        <v-spacer />
+        <v-btn
+          icon="mdi-refresh"
+          size="x-small"
+          variant="text"
+          :loading="loading"
+          :title="t('sftp.refresh')"
+          @click="refresh"
         />
-        <div class="text-caption text-medium-emphasis mb-4">
-          {{ t('monitor.load') }}: {{ metrics.loadAvg?.map((n) => n.toFixed(2)).join(' · ') || '—' }}
-        </div>
+      </div>
+      <v-divider />
 
-        <!-- Bellek -->
-        <div class="d-flex justify-space-between text-caption mb-1">
-          <span>{{ t('monitor.memory') }}</span>
-          <span>{{ fmtBytes(metrics.memUsedBytes) }} / {{ fmtBytes(metrics.memTotalBytes) }}</span>
-        </div>
-        <v-progress-linear
-          :model-value="memPercent"
-          :color="barColor(memPercent)"
-          height="8"
-          rounded
-          class="mb-4"
-        />
+      <div class="flex-grow-1 overflow-y-auto pa-3">
+        <template v-if="metrics && !metrics.ok">
+          <v-alert type="warning">
+            {{ metrics.error || t('monitor.unavailable') }}
+          </v-alert>
+        </template>
 
-        <!-- Diskler -->
-        <div class="text-caption text-medium-emphasis mb-1">{{ t('monitor.disks') }}</div>
-        <div v-for="disk in metrics.disks" :key="disk.mount" class="mb-3">
+        <template v-else-if="metrics">
+          <!-- Uptime -->
+          <div class="text-caption text-medium-emphasis mb-1">{{ t('monitor.uptime') }}</div>
+          <div class="text-body-2 mb-4">{{ metrics.uptime || '—' }}</div>
+
+          <!-- CPU / load -->
           <div class="d-flex justify-space-between text-caption mb-1">
-            <span class="text-truncate" :title="disk.mount">{{ disk.mount }}</span>
-            <span>{{ fmtBytes(disk.usedBytes) }} / {{ fmtBytes(disk.sizeBytes) }}</span>
+            <span
+              >{{ t('monitor.cpu') }} ({{ metrics.cpuCount ?? '?' }} {{ t('monitor.cores') }})</span
+            >
+            <span>{{ loadPercent }}%</span>
           </div>
           <v-progress-linear
-            :model-value="disk.usePercent"
-            :color="barColor(disk.usePercent)"
-            height="6"
+            :model-value="loadPercent"
+            :color="barColor(loadPercent)"
+            height="8"
             rounded
+            class="mb-1"
           />
-        </div>
+          <div class="text-caption text-medium-emphasis mb-4">
+            {{ t('monitor.load') }}:
+            {{ metrics.loadAvg?.map((n) => n.toFixed(2)).join(' · ') || '—' }}
+          </div>
 
-        <!-- Süreçler -->
-        <div class="text-caption text-medium-emphasis mt-4 mb-1">
-          {{ t('monitor.topProcesses') }}
-        </div>
-        <v-table density="compact" class="proc-table">
-          <thead>
-            <tr>
-              <th>PID</th>
-              <th>CPU%</th>
-              <th>MEM%</th>
-              <th>{{ t('monitor.command') }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="proc in metrics.processes" :key="proc.pid">
-              <td>{{ proc.pid }}</td>
-              <td>{{ proc.cpu.toFixed(1) }}</td>
-              <td>{{ proc.mem.toFixed(1) }}</td>
-              <td class="text-truncate" :title="proc.command">{{ proc.command }}</td>
-            </tr>
-          </tbody>
-        </v-table>
-      </template>
+          <!-- Bellek -->
+          <div class="d-flex justify-space-between text-caption mb-1">
+            <span>{{ t('monitor.memory') }}</span>
+            <span
+              >{{ fmtBytes(metrics.memUsedBytes) }} / {{ fmtBytes(metrics.memTotalBytes) }}</span
+            >
+          </div>
+          <v-progress-linear
+            :model-value="memPercent"
+            :color="barColor(memPercent)"
+            height="8"
+            rounded
+            class="mb-4"
+          />
 
-      <div v-else class="d-flex justify-center pa-4">
-        <v-progress-circular indeterminate size="24" />
+          <!-- Diskler -->
+          <div class="text-caption text-medium-emphasis mb-1">{{ t('monitor.disks') }}</div>
+          <div v-for="disk in metrics.disks" :key="disk.mount" class="mb-3">
+            <div class="d-flex justify-space-between text-caption mb-1">
+              <span class="text-truncate" :title="disk.mount">{{ disk.mount }}</span>
+              <span>{{ fmtBytes(disk.usedBytes) }} / {{ fmtBytes(disk.sizeBytes) }}</span>
+            </div>
+            <v-progress-linear
+              :model-value="disk.usePercent"
+              :color="barColor(disk.usePercent)"
+              height="6"
+              rounded
+            />
+          </div>
+
+          <!-- Süreçler -->
+          <div class="text-caption text-medium-emphasis mt-4 mb-1">
+            {{ t('monitor.topProcesses') }}
+          </div>
+          <v-table density="compact" class="proc-table">
+            <thead>
+              <tr>
+                <th>PID</th>
+                <th>CPU%</th>
+                <th>MEM%</th>
+                <th>{{ t('monitor.command') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="proc in metrics.processes" :key="proc.pid">
+                <td>{{ proc.pid }}</td>
+                <td>{{ proc.cpu.toFixed(1) }}</td>
+                <td>{{ proc.mem.toFixed(1) }}</td>
+                <td class="text-truncate" :title="proc.command">{{ proc.command }}</td>
+              </tr>
+            </tbody>
+          </v-table>
+        </template>
+
+        <div v-else class="d-flex justify-center pa-4">
+          <v-progress-circular indeterminate size="24" />
+        </div>
       </div>
-    </div>
     </div>
   </LtrRegion>
 </template>

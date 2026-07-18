@@ -1,6 +1,13 @@
+import type {
+  Group,
+  Host,
+  IdentityPublic,
+  IdentitySaveRequest,
+  Snippet,
+  Tunnel
+} from '@shared/types'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { Host, Group, Snippet, Tunnel, IdentityPublic, IdentitySaveRequest } from '@shared/types'
+import { computed, ref } from 'vue'
 
 export const useVaultStore = defineStore('vault', () => {
   const hosts = ref<Host[]>([])

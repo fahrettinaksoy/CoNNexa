@@ -1,3 +1,29 @@
+import type {
+  AiConfigInput,
+  AiConfigPublic,
+  AlarmConfig,
+  CreateSessionRequest,
+  CreateSessionResult,
+  Group,
+  Host,
+  HostMetrics,
+  IdentityPublic,
+  IdentitySaveRequest,
+  ImportSummary,
+  PluginResult,
+  SftpEntry,
+  SftpResult,
+  Snippet,
+  SyncConfigInput,
+  SyncConfigPublic,
+  SyncResult,
+  TeamVaultInput,
+  TeamVaultPublic,
+  TeamVaultResult,
+  Tunnel,
+  VaultData
+} from '@shared/types'
+import type { UnlistenFn } from '@tauri-apps/api/event'
 /**
  * Connexa köprüsü — arayüzün `window.connexa` API'sini Rust arka uca bağlar.
  * Tüm çağrı yüzeyi (vault/sessions/sftp/...) `@tauri-apps/api` invoke/listen
@@ -7,32 +33,7 @@
  * JS'teki camelCase argümanları otomatik snake_case'e çevirir.
  */
 import { invoke } from '@tauri-apps/api/core'
-import { listen, type UnlistenFn } from '@tauri-apps/api/event'
-import type {
-  Host,
-  Group,
-  Snippet,
-  Tunnel,
-  SyncConfigInput,
-  SyncConfigPublic,
-  SyncResult,
-  HostMetrics,
-  AlarmConfig,
-  AiConfigPublic,
-  AiConfigInput,
-  PluginResult,
-  TeamVaultPublic,
-  TeamVaultInput,
-  TeamVaultResult,
-  IdentitySaveRequest,
-  CreateSessionRequest,
-  CreateSessionResult,
-  VaultData,
-  IdentityPublic,
-  SftpEntry,
-  SftpResult,
-  ImportSummary
-} from '@shared/types'
+import { listen } from '@tauri-apps/api/event'
 
 interface TunnelResult {
   ok: boolean

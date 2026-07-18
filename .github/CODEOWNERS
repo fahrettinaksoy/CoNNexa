@@ -1,0 +1,12 @@
+# Kod sahipliği — bu yolları değiştiren PR'lar otomatik olarak sahibi inceleyici atar.
+# https://docs.github.com/en/repositories/managing-your-repos-settings-and-features/customizing-your-repository/about-code-owners
+
+# Varsayılan: her şey.
+*                           @fahrettinaksoy
+
+# Güvenlik-kritik alanlar — Rust arka uç, capability/CSP, CI/release.
+/src-tauri/                 @fahrettinaksoy
+/src-tauri/capabilities/    @fahrettinaksoy
+/src-tauri/src/crypto.rs    @fahrettinaksoy
+/src-tauri/src/vault.rs     @fahrettinaksoy
+/.github/                   @fahrettinaksoy

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 🔒 Güvenlik açığı
+    url: https://github.com/fahrettinaksoy/connexa/security/advisories/new
+    about: Güvenlik açıklarını herkese açık issue olarak DEĞİL, buradan özel bildir.
+  - name: 💬 Soru / tartışma
+    url: https://github.com/fahrettinaksoy/connexa/discussions
+    about: Hata değil de bir sorun/fikir ise tartışmalarda konuş.

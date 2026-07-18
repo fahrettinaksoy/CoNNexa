@@ -1,6 +1,6 @@
+import type { TeamVaultPublic } from '@shared/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import type { TeamVaultPublic } from '@shared/types'
 
 export const useTeamsStore = defineStore('teams', () => {
   const teams = ref<TeamVaultPublic[]>([])

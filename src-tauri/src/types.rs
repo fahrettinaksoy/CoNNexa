@@ -255,10 +255,18 @@ pub struct SftpResult<T: Serialize> {
 
 impl<T: Serialize> SftpResult<T> {
     pub fn ok(data: T) -> Self {
-        Self { ok: true, error: None, data: Some(data) }
+        Self {
+            ok: true,
+            error: None,
+            data: Some(data),
+        }
     }
     pub fn err(msg: impl Into<String>) -> Self {
-        Self { ok: false, error: Some(msg.into()), data: None }
+        Self {
+            ok: false,
+            error: Some(msg.into()),
+            data: None,
+        }
     }
 }
 
@@ -278,10 +286,26 @@ pub struct ImportSummary {
 
 impl ImportSummary {
     pub fn canceled() -> Self {
-        Self { ok: false, error: None, canceled: Some(true), hosts: 0, identities: 0, groups: 0, skipped: 0 }
+        Self {
+            ok: false,
+            error: None,
+            canceled: Some(true),
+            hosts: 0,
+            identities: 0,
+            groups: 0,
+            skipped: 0,
+        }
     }
     pub fn error(msg: impl Into<String>) -> Self {
-        Self { ok: false, error: Some(msg.into()), canceled: None, hosts: 0, identities: 0, groups: 0, skipped: 0 }
+        Self {
+            ok: false,
+            error: Some(msg.into()),
+            canceled: None,
+            hosts: 0,
+            identities: 0,
+            groups: 0,
+            skipped: 0,
+        }
     }
 }
 
@@ -508,10 +532,16 @@ pub struct SimpleResult {
 
 impl SimpleResult {
     pub fn ok() -> Self {
-        Self { ok: true, error: None }
+        Self {
+            ok: true,
+            error: None,
+        }
     }
     pub fn err(msg: impl Into<String>) -> Self {
-        Self { ok: false, error: Some(msg.into()) }
+        Self {
+            ok: false,
+            error: Some(msg.into()),
+        }
     }
     pub fn from(res: Result<(), String>) -> Self {
         match res {

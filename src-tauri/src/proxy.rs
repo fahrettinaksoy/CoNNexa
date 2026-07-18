@@ -42,6 +42,9 @@ async fn start_vnc_bridge(
         // Tek kullanımlık: ilk bağlantıyı kabul et.
         if let Ok((stream, _)) = listener.accept().await {
             let expected = expected_path.clone();
+            // tungstenite'in ErrorResponse tipi büyük; tek seferlik handshake
+            // callback'i olduğu için boxing gereksiz.
+            #[allow(clippy::result_large_err)]
             let check = |req: &Request, resp: Response| {
                 if req.uri().path() == expected {
                     Ok(resp)
@@ -63,10 +66,7 @@ async fn start_vnc_bridge(
 }
 
 /// WebSocket ↔ TCP çift yönlü aktarım.
-async fn relay_ws_tcp(
-    ws: tokio_tungstenite::WebSocketStream<TcpStream>,
-    tcp: TcpStream,
-) {
+async fn relay_ws_tcp(ws: tokio_tungstenite::WebSocketStream<TcpStream>, tcp: TcpStream) {
     let (mut ws_tx, mut ws_rx) = ws.split();
     let (mut tcp_rd, mut tcp_wr) = tcp.into_split();
 
@@ -77,7 +77,11 @@ async fn relay_ws_tcp(
             match tcp_rd.read(&mut buf).await {
                 Ok(0) | Err(_) => break,
                 Ok(n) => {
-                    if ws_tx.send(Message::Binary(buf[..n].to_vec())).await.is_err() {
+                    if ws_tx
+                        .send(Message::Binary(buf[..n].to_vec()))
+                        .await
+                        .is_err()
+                    {
                         break;
                     }
                 }
@@ -136,7 +140,11 @@ pub async fn create_bridge_session(
             state
                 .sessions
                 .insert_passive(descriptor.clone(), Some(Box::new(move || handle.abort())));
-            Ok(CreateSessionResult { ok: true, session: Some(descriptor), error: None })
+            Ok(CreateSessionResult {
+                ok: true,
+                session: Some(descriptor),
+                error: None,
+            })
         }
         Protocol::Rdp => Ok(CreateSessionResult {
             ok: false,
@@ -147,6 +155,10 @@ pub async fn create_bridge_session(
                     .to_string(),
             ),
         }),
-        _ => Ok(CreateSessionResult { ok: false, session: None, error: Some("desteklenmeyen".into()) }),
+        _ => Ok(CreateSessionResult {
+            ok: false,
+            session: None,
+            error: Some("desteklenmeyen".into()),
+        }),
     }
 }
