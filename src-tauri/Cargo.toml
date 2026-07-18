@@ -31,7 +31,7 @@ async-trait = "0.1"
 bytes = "1"
 
 # SSH: oturum shell'i, exec, SFTP, tünel port yönlendirme.
-russh = "0.45"
+russh = "0.61"
 russh-sftp = "2"
 
 # Yerel terminal PTY.
