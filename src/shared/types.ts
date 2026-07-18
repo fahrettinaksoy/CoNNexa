@@ -1,5 +1,5 @@
 /**
- * Connexa ortak tip tanımları — main, preload ve renderer tarafından paylaşılır.
+ * Connexa ortak tip tanımları — arayüz (WebView) ve Rust arka uç tarafından paylaşılır.
  * Veri modeli: Termius taksonomisi (Host/Group/Identity ayrımı) + mRemoteNG ayar kalıtımı.
  * Bkz. docs/CONNEXA_RAKIP_ANALIZ_RAPORU.md §6.1
  */
@@ -27,10 +27,10 @@ export interface Identity {
   name: string
   username: string
   authType: AuthType
-  /** safeStorage ile şifrelenmiş parola (base64) — renderer'a asla düz metin gitmez */
+  /** OS anahtarlığı ile şifrelenmiş parola (base64) — arayüze asla düz metin gitmez */
   passwordEnc?: string
   privateKeyPath?: string
-  /** safeStorage ile şifrelenmiş passphrase (base64) */
+  /** OS anahtarlığı ile şifrelenmiş passphrase (base64) */
   passphraseEnc?: string
   /** Ayarlıysa parola bu yöneticiden çözülür (passwordEnc yerine) */
   secretRef?: SecretRef
@@ -38,7 +38,7 @@ export interface Identity {
   teamVaultId?: string
 }
 
-/** Renderer'a gönderilen, sır içermeyen Identity görünümü */
+/** Arayüze gönderilen, sır içermeyen Identity görünümü */
 export interface IdentityPublic {
   id: string
   name: string
@@ -127,7 +127,7 @@ export interface SessionDescriptor {
   hostId?: string
   /**
    * VNC/RDP kimlik doğrulaması istemci tarafında (noVNC / ironrdp-wasm)
-   * gerçekleştiğinden bu alanlardaki parolalar renderer'a geçici olarak
+   * gerçekleştiğinden bu alanlardaki parolalar arayüze geçici olarak
    * gönderilir; vault'ta her zaman şifreli dururlar ve kalıcılaştırılmazlar.
    */
   vnc?: {
@@ -283,7 +283,7 @@ export interface TeamVaultResult {
 
 export type SyncBackend = 'none' | 'gist' | 'webdav'
 
-/** Renderer'a gösterilen sync yapılandırması — sır içermez */
+/** Arayüze gösterilen sync yapılandırması — sır içermez */
 export interface SyncConfigPublic {
   backend: SyncBackend
   gistId?: string
