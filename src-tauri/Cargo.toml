@@ -31,7 +31,7 @@ bytes = "1"
 
 # SSH: oturum shell'i, exec, SFTP, tünel port yönlendirme.
 # (0.61: RUSTSEC-2026-0154/0153 düzeltmesi)
-russh = "0.61"
+russh = "0.64"
 russh-sftp = "2"
 
 # Yerel terminal PTY.
